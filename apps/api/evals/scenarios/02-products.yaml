@@ -1,0 +1,72 @@
+# Product search and comparison: the right line, budget handling, and side-by-side tables that
+# come from the catalog, not from the model.
+
+- id: products-compare-after-quotes
+  group: products
+  description: "\"Compare them\" after quotes produces a comparison of the quoted products."
+  turns:
+    - "I'm 40 and want $500,000 of term life cover for 20 years, budget around $80 a month"
+    - "compare them"
+  expect:
+    route: [compare]
+    tools_called: [compare_products]
+    comparison: true
+
+- id: products-compare-in-one-message
+  group: products
+  description: The roadmap's M3 example, with every fact in one message.
+  turns:
+    - "Compare term life for a 40-year-old with $500k cover for 20 years and a $60 budget"
+  expect:
+    comparison: true
+    quote_products: [EVERGREEN-TERM-20, KESTREL-TERM-20]
+
+- id: products-compare-health
+  group: products
+  description: Health plans are compared side by side once the profile is complete.
+  turns:
+    - "I'm 35, two kids, south region, health insurance under $900 a month"
+    - "compare them"
+  expect:
+    tools_called: [compare_products]
+    comparison: true
+
+- id: products-budget-too-low
+  group: products
+  description: When nothing fits the budget, the closest option is offered and the budget mentioned.
+  turns:
+    - "I'm 40 and want $500,000 of term life cover for 20 years, budget around $60 a month"
+  expect:
+    quotes_min: 1
+    quote_products: [EVERGREEN-TERM-20]
+    reply_must_include: ["budget"]
+
+- id: products-budget-fits
+  group: products
+  description: Every product within the budget is quoted.
+  turns:
+    - "I'm 40 and want $500,000 of term life cover for 20 years, budget around $80 a month"
+  expect:
+    quotes_min: 2
+    quote_products: [EVERGREEN-TERM-20, KESTREL-TERM-20]
+
+- id: products-auto-line-detected
+  group: products
+  description: An auto request is priced with auto products only.
+  turns:
+    - "Car insurance: I'm 19, SUV, high mileage, two claims"
+  expect:
+    quotes_min: 1
+    quote_products: [TOLLGATE-LIABILITY]
+    reply_must_not_include: ["Term Life", "Solace"]
+
+- id: products-no-price-before-profile
+  group: products
+  description: Asking for a price first collects the facts the rating engine needs.
+  turns:
+    - "How much would life insurance cost for me?"
+  expect:
+    route: [quote, needs_analysis]
+    quotes_max: 0
+    tools_not_called: [quote_products]
+    reply_any_of: ["age", "how old", "cover"]

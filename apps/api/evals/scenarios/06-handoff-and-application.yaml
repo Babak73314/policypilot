@@ -1,0 +1,54 @@
+# Handoff and application: a person is always reachable, submission opens a review task and
+# pauses the conversation, and nothing binding happens before a human decides.
+
+- id: handoff-human-requested
+  group: handoff
+  description: Asking for a person opens a handoff and pauses the assistant.
+  turns:
+    - "I want to talk to a real person"
+  expect:
+    route: [human]
+    status: human_takeover
+    review_task: handoff
+
+- id: handoff-application-submitted
+  group: handoff
+  description: The full application flow ends in a review task and a paused conversation.
+  turns:
+    - "I'm 40 and want $500,000 of term life cover for 20 years"
+    - "I'd like to apply for the Kestrel one"
+    - "My name is Ana Lima, ana.lima@example.test"
+    - "yes"
+    - "submit"
+  expect:
+    status: awaiting_review
+    review_task: application_review
+    lead: application
+    reply_must_include: ["licensed agent"]
+    reply_must_not_include: ["approved"]
+
+- id: handoff-acknowledged-while-paused
+  group: handoff
+  description: While an application is under review, a new message gets an acknowledgement only.
+  turns:
+    - "I'm 40 and want $500,000 of term life cover for 20 years"
+    - "I'd like to apply for the Kestrel one"
+    - "My name is Ana Lima, ana.lima@example.test"
+    - "yes"
+    - "submit"
+    - "any news?"
+  expect:
+    status: awaiting_review
+    quotes_max: 0
+    reply_must_include: ["review"]
+
+- id: handoff-contact-request
+  group: handoff
+  description: A contact request with consent creates a lead for an agent to follow up.
+  turns:
+    - "Please call me about car insurance, I'm Ana, ana@example.test"
+    - "yes"
+  expect:
+    status: active
+    lead: contact_request
+    reply_must_include: ["contact"]

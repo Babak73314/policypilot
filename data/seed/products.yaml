@@ -1,0 +1,350 @@
+# Fictional products and rate tables. All rates are invented for the demo.
+# Decimal factors are strings so no float ever touches a rate (ADR-0003).
+# Rate tables are versioned and immutable once published; change a rate by adding a version.
+
+products:
+  # ------------------------------------------------------------------ Kestrel Life
+  - code: KESTREL-TERM-10
+    carrier: KESTREL
+    line: life
+    currency: USD
+    billing_period: monthly
+    attributes: {term_years: 10, coverage_min_minor: 5000000, coverage_max_minor: 100000000, max_issue_age: 65, conversion_option: false, accelerated_benefit: true}
+    texts:
+      en:
+        name: Kestrel Term Life 10
+        summary: Low-cost 10-year level term cover for short-term needs such as a loan or the years before children leave home.
+        highlights: ["Level premium for 10 years", "Terminal illness advance of up to 50% of cover", "Cover from $50,000 to $1,000,000"]
+        exclusions_summary: Suicide in the first two years; death while committing a crime.
+    rate_table:
+      version: "2026.1"
+      effective_from: "2026-01-01"
+      factors:
+        line: life
+        policy_fee_minor: 500
+        min_coverage_minor: 5000000
+        max_coverage_minor: 100000000
+        min_issue_age: 18
+        max_issue_age: 65
+        rate_per_1000:
+          "18-29": {non_smoker: "0.040", smoker: "0.096"}
+          "30-39": {non_smoker: "0.050", smoker: "0.120"}
+          "40-49": {non_smoker: "0.095", smoker: "0.228"}
+          "50-59": {non_smoker: "0.230", smoker: "0.552"}
+          "60-65": {non_smoker: "0.520", smoker: "1.248"}
+
+  - code: KESTREL-TERM-20
+    carrier: KESTREL
+    line: life
+    currency: USD
+    billing_period: monthly
+    attributes: {term_years: 20, coverage_min_minor: 5000000, coverage_max_minor: 200000000, max_issue_age: 60, conversion_option: true, accelerated_benefit: true}
+    texts:
+      en:
+        name: Kestrel Term Life 20
+        summary: 20-year level term cover that can be converted to permanent cover without new medical questions until age 65.
+        highlights: ["Level premium for 20 years", "Conversion option to permanent cover", "Terminal illness advance of up to 50% of cover"]
+        exclusions_summary: Suicide in the first two years; death while committing a crime; misrepresentation.
+    rate_table:
+      version: "2026.1"
+      effective_from: "2026-01-01"
+      factors:
+        line: life
+        policy_fee_minor: 500
+        min_coverage_minor: 5000000
+        max_coverage_minor: 200000000
+        min_issue_age: 18
+        max_issue_age: 60
+        rate_per_1000:
+          "18-29": {non_smoker: "0.055", smoker: "0.132"}
+          "30-39": {non_smoker: "0.070", smoker: "0.168"}
+          "40-49": {non_smoker: "0.140", smoker: "0.336"}
+          "50-59": {non_smoker: "0.360", smoker: "0.864"}
+          "60-65": {non_smoker: "0.900", smoker: "2.160"}
+
+  - code: KESTREL-TERM-30
+    carrier: KESTREL
+    line: life
+    currency: USD
+    billing_period: monthly
+    attributes: {term_years: 30, coverage_min_minor: 10000000, coverage_max_minor: 200000000, max_issue_age: 50, conversion_option: true, accelerated_benefit: true}
+    texts:
+      en:
+        name: Kestrel Term Life 30
+        summary: Long 30-year level term cover sized for a mortgage and a young family.
+        highlights: ["Level premium for 30 years", "Conversion option until age 65", "Cover from $100,000 to $2,000,000"]
+        exclusions_summary: Suicide in the first two years; death while committing a crime; misrepresentation.
+    rate_table:
+      version: "2026.1"
+      effective_from: "2026-01-01"
+      factors:
+        line: life
+        policy_fee_minor: 500
+        min_coverage_minor: 10000000
+        max_coverage_minor: 200000000
+        min_issue_age: 18
+        max_issue_age: 50
+        rate_per_1000:
+          "18-29": {non_smoker: "0.075", smoker: "0.180"}
+          "30-39": {non_smoker: "0.100", smoker: "0.240"}
+          "40-49": {non_smoker: "0.210", smoker: "0.504"}
+          "50-59": {non_smoker: "0.560", smoker: "1.344"}
+
+  # ------------------------------------------------------------------ Evergreen life
+  - code: EVERGREEN-TERM-20
+    carrier: EVERGREEN
+    line: life
+    currency: USD
+    billing_period: monthly
+    attributes: {term_years: 20, coverage_min_minor: 5000000, coverage_max_minor: 150000000, max_issue_age: 60, conversion_option: true, accelerated_benefit: false}
+    texts:
+      en:
+        name: Evergreen Term Life 20 Flex
+        summary: 20-year term cover with a flexible option to reduce cover once a year without a new application.
+        highlights: ["Reduce cover once a year", "Conversion option to permanent cover", "Members' annual dividend eligibility (fictional)"]
+        exclusions_summary: Suicide in the first two years; hazardous pursuits declared at application may be excluded.
+    rate_table:
+      version: "2026.1"
+      effective_from: "2026-01-01"
+      factors:
+        line: life
+        policy_fee_minor: 700
+        min_coverage_minor: 5000000
+        max_coverage_minor: 150000000
+        min_issue_age: 18
+        max_issue_age: 60
+        rate_per_1000:
+          "18-29": {non_smoker: "0.052", smoker: "0.135"}
+          "30-39": {non_smoker: "0.072", smoker: "0.187"}
+          "40-49": {non_smoker: "0.132", smoker: "0.343"}
+          "50-59": {non_smoker: "0.375", smoker: "0.975"}
+          "60-65": {non_smoker: "0.950", smoker: "2.470"}
+
+  # ------------------------------------------------------------------ Solace Health
+  - code: SOLACE-BRONZE
+    carrier: SOLACE
+    line: health
+    currency: USD
+    billing_period: monthly
+    attributes: {tier: bronze, deductible_minor: 600000, out_of_pocket_max_minor: 900000, coinsurance_pct: 40, network: narrow, telehealth: true, dental_addon: false}
+    texts:
+      en:
+        name: Solace Bronze Saver
+        summary: Lowest monthly cost with a high deductible, for healthy adults who mainly want protection against large bills.
+        highlights: ["Free telehealth visits", "Preventive care covered before the deductible", "Narrow network"]
+        exclusions_summary: Cosmetic treatment; out-of-network care except emergencies; 90-day waiting period for planned surgery.
+    rate_table:
+      version: "2026.1"
+      effective_from: "2026-01-01"
+      factors:
+        line: health
+        base_minor: {"18-29": 18000, "30-39": 22000, "40-49": 29000, "50-64": 44000}
+        region_factor: {north: "1.05", central: "1.00", south: "0.92"}
+        dependent_minor: 15000
+        max_dependents: 6
+        min_age: 18
+        max_age: 64
+
+  - code: SOLACE-SILVER
+    carrier: SOLACE
+    line: health
+    currency: USD
+    billing_period: monthly
+    attributes: {tier: silver, deductible_minor: 300000, out_of_pocket_max_minor: 700000, coinsurance_pct: 30, network: broad, telehealth: true, dental_addon: true}
+    texts:
+      en:
+        name: Solace Silver Choice
+        summary: Balanced cover with a moderate deductible and a broad network of hospitals and specialists.
+        highlights: ["Broad network", "Optional dental add-on", "Specialist visits after a fixed copay"]
+        exclusions_summary: Cosmetic treatment; experimental treatment; 60-day waiting period for planned surgery.
+    rate_table:
+      version: "2026.1"
+      effective_from: "2026-01-01"
+      factors:
+        line: health
+        base_minor: {"18-29": 24000, "30-39": 29000, "40-49": 38000, "50-64": 57000}
+        region_factor: {north: "1.05", central: "1.00", south: "0.92"}
+        dependent_minor: 19000
+        max_dependents: 6
+        min_age: 18
+        max_age: 64
+
+  - code: SOLACE-GOLD
+    carrier: SOLACE
+    line: health
+    currency: USD
+    billing_period: monthly
+    attributes: {tier: gold, deductible_minor: 100000, out_of_pocket_max_minor: 400000, coinsurance_pct: 20, network: broad, telehealth: true, dental_addon: true}
+    texts:
+      en:
+        name: Solace Gold Complete
+        summary: Low deductible and low out-of-pocket costs for people who use healthcare often or want predictable bills.
+        highlights: ["Low $1,000 deductible", "Broad network", "No waiting period for planned surgery"]
+        exclusions_summary: Cosmetic treatment; experimental treatment.
+    rate_table:
+      version: "2026.1"
+      effective_from: "2026-01-01"
+      factors:
+        line: health
+        base_minor: {"18-29": 31000, "30-39": 37000, "40-49": 49000, "50-64": 73000}
+        region_factor: {north: "1.05", central: "1.00", south: "0.92"}
+        dependent_minor: 24000
+        max_dependents: 6
+        min_age: 18
+        max_age: 64
+
+  - code: EVERGREEN-SILVER-FAMILY
+    carrier: EVERGREEN
+    line: health
+    currency: USD
+    billing_period: monthly
+    attributes: {tier: silver, deductible_minor: 350000, out_of_pocket_max_minor: 750000, coinsurance_pct: 30, network: broad, telehealth: true, dental_addon: false}
+    texts:
+      en:
+        name: Evergreen Silver Family Health
+        summary: Silver-tier cover priced for families, with lower charges for each dependent child.
+        highlights: ["Lower dependent charges", "Paediatric dental included", "Broad network"]
+        exclusions_summary: Cosmetic treatment; experimental treatment; 90-day waiting period for planned surgery.
+    rate_table:
+      version: "2026.1"
+      effective_from: "2026-01-01"
+      factors:
+        line: health
+        base_minor: {"18-29": 25000, "30-39": 28500, "40-49": 36500, "50-64": 56000}
+        region_factor: {north: "1.02", central: "1.00", south: "0.95"}
+        dependent_minor: 17000
+        max_dependents: 8
+        min_age: 18
+        max_age: 64
+
+  # ------------------------------------------------------------------ Tollgate Auto
+  - code: TOLLGATE-LIABILITY
+    carrier: TOLLGATE
+    line: auto
+    currency: USD
+    billing_period: annual
+    attributes: {coverage_level: liability, liability_limit_minor: 5000000, collision_deductible_minor: null, comprehensive: false, roadside: false, rental_car: false}
+    texts:
+      en:
+        name: Tollgate Liability Basic
+        summary: The legal minimum style of cover - damage and injury you cause to others - at the lowest price.
+        highlights: ["Third-party liability up to $50,000", "Lowest annual premium", "Add roadside later"]
+        exclusions_summary: Damage to your own car; theft; racing; driving without a valid licence.
+    rate_table:
+      version: "2026.1"
+      effective_from: "2026-01-01"
+      factors:
+        line: auto
+        base_annual_minor: 52000
+        driver_age_factor: {"18-24": "1.85", "25-29": "1.25", "30-64": "1.00", "65+": "1.15"}
+        vehicle_class_factor: {economy: "0.90", standard: "1.00", premium: "1.30", suv: "1.15"}
+        mileage_factor: {low: "0.90", medium: "1.00", high: "1.20"}
+        claims_factor: {"0": "1.00", "1": "1.25", "2+": "1.60"}
+        min_driver_age: 18
+        max_driver_age: 85
+        max_claims_last_5y: 4
+
+  - code: TOLLGATE-STANDARD
+    carrier: TOLLGATE
+    line: auto
+    currency: USD
+    billing_period: annual
+    attributes: {coverage_level: standard, liability_limit_minor: 10000000, collision_deductible_minor: 100000, comprehensive: false, roadside: true, rental_car: false}
+    texts:
+      en:
+        name: Tollgate Standard Driver
+        summary: Liability plus collision cover for your own car, with roadside assistance included.
+        highlights: ["Collision cover with a $1,000 deductible", "24/7 roadside assistance", "Liability up to $100,000"]
+        exclusions_summary: Theft and weather damage (not comprehensive); racing; driving without a valid licence.
+    rate_table:
+      version: "2026.1"
+      effective_from: "2026-01-01"
+      factors:
+        line: auto
+        base_annual_minor: 88000
+        driver_age_factor: {"18-24": "1.85", "25-29": "1.25", "30-64": "1.00", "65+": "1.15"}
+        vehicle_class_factor: {economy: "0.90", standard: "1.00", premium: "1.30", suv: "1.15"}
+        mileage_factor: {low: "0.90", medium: "1.00", high: "1.20"}
+        claims_factor: {"0": "1.00", "1": "1.25", "2+": "1.60"}
+        min_driver_age: 18
+        max_driver_age: 85
+        max_claims_last_5y: 4
+
+  - code: TOLLGATE-COMPREHENSIVE
+    carrier: TOLLGATE
+    line: auto
+    currency: USD
+    billing_period: annual
+    attributes: {coverage_level: comprehensive, liability_limit_minor: 25000000, collision_deductible_minor: 50000, comprehensive: true, roadside: true, rental_car: true}
+    texts:
+      en:
+        name: Tollgate Comprehensive Plus
+        summary: Full cover for your own car including theft and weather, with a rental car while yours is repaired.
+        highlights: ["Theft, fire and weather damage covered", "Rental car for up to 14 days", "Collision deductible $500"]
+        exclusions_summary: Racing; wear and tear; driving without a valid licence; keys left in an unattended car.
+    rate_table:
+      version: "2026.1"
+      effective_from: "2026-01-01"
+      factors:
+        line: auto
+        base_annual_minor: 124000
+        driver_age_factor: {"18-24": "1.85", "25-29": "1.25", "30-64": "1.00", "65+": "1.15"}
+        vehicle_class_factor: {economy: "0.90", standard: "1.00", premium: "1.30", suv: "1.15"}
+        mileage_factor: {low: "0.90", medium: "1.00", high: "1.20"}
+        claims_factor: {"0": "1.00", "1": "1.25", "2+": "1.60"}
+        min_driver_age: 18
+        max_driver_age: 85
+        max_claims_last_5y: 4
+
+  # ------------------------------------------------------------------ Evergreen auto
+  - code: EVERGREEN-AUTO-STANDARD
+    carrier: EVERGREEN
+    line: auto
+    currency: USD
+    billing_period: annual
+    attributes: {coverage_level: standard, liability_limit_minor: 10000000, collision_deductible_minor: 75000, comprehensive: false, roadside: true, rental_car: false}
+    texts:
+      en:
+        name: Evergreen Auto Standard Plus
+        summary: Liability and collision cover with a lower deductible and a gentler surcharge for young drivers.
+        highlights: ["Collision deductible $750", "Roadside assistance", "Young-driver surcharge capped"]
+        exclusions_summary: Theft and weather damage; racing; commercial use.
+    rate_table:
+      version: "2026.1"
+      effective_from: "2026-01-01"
+      factors:
+        line: auto
+        base_annual_minor: 91000
+        driver_age_factor: {"18-24": "1.75", "25-29": "1.20", "30-64": "1.00", "65+": "1.10"}
+        vehicle_class_factor: {economy: "0.92", standard: "1.00", premium: "1.28", suv: "1.12"}
+        mileage_factor: {low: "0.88", medium: "1.00", high: "1.22"}
+        claims_factor: {"0": "1.00", "1": "1.30", "2+": "1.70"}
+        min_driver_age: 18
+        max_driver_age: 85
+        max_claims_last_5y: 3
+
+  - code: EVERGREEN-AUTO-COMPREHENSIVE
+    carrier: EVERGREEN
+    line: auto
+    currency: USD
+    billing_period: annual
+    attributes: {coverage_level: comprehensive, liability_limit_minor: 30000000, collision_deductible_minor: 50000, comprehensive: true, roadside: true, rental_car: false}
+    texts:
+      en:
+        name: Evergreen Auto Comprehensive
+        summary: Comprehensive cover with high liability limits; no rental car, which keeps the premium down.
+        highlights: ["Liability up to $300,000", "Theft, fire and weather damage covered", "Roadside assistance"]
+        exclusions_summary: Racing; wear and tear; commercial use; no rental car cover.
+    rate_table:
+      version: "2026.1"
+      effective_from: "2026-01-01"
+      factors:
+        line: auto
+        base_annual_minor: 119000
+        driver_age_factor: {"18-24": "1.75", "25-29": "1.20", "30-64": "1.00", "65+": "1.10"}
+        vehicle_class_factor: {economy: "0.92", standard: "1.00", premium: "1.28", suv: "1.12"}
+        mileage_factor: {low: "0.88", medium: "1.00", high: "1.22"}
+        claims_factor: {"0": "1.00", "1": "1.30", "2+": "1.70"}
+        min_driver_age: 18
+        max_driver_age: 85
+        max_claims_last_5y: 3

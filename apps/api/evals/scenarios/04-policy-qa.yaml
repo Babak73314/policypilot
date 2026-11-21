@@ -1,0 +1,90 @@
+# Policy questions (RAG): answers cite the wording of the product the customer named. Offline,
+# the hashing embedder is lexical only, so these check the route, the tool and the cited product;
+# the live judge checks that each claim is supported by the cited clause.
+
+- id: rag-kestrel-suicide
+  group: policy_qa
+  description: A question naming a carrier cites only that carrier's wordings.
+  turns:
+    - "Does the Kestrel policy cover suicide in the first years?"
+  expect:
+    route: [product_question]
+    tools_called: [search_policy_documents]
+    citations_min: 1
+    citation_products: [KESTREL-TERM-10, KESTREL-TERM-20, KESTREL-TERM-30]
+  judge:
+    - Says that suicide within the first two years is excluded, as the cited clause states
+    - Makes no claim that the cited text does not support
+
+- id: rag-solace-gold-maternity
+  group: policy_qa
+  description: A named plan scopes the search to that plan's wording.
+  turns:
+    - "Is there a waiting period for maternity on the Solace Gold plan?"
+  expect:
+    route: [product_question]
+    citations_min: 1
+    citation_products: [SOLACE-GOLD]
+  judge:
+    - States the maternity waiting period from the Solace Gold wording
+
+- id: rag-tollgate-comprehensive-rental
+  group: policy_qa
+  description: Carrier plus product word picks the one matching product.
+  turns:
+    - "Does the Tollgate comprehensive policy include a rental car?"
+  expect:
+    route: [product_question]
+    citations_min: 1
+    citation_products: [TOLLGATE-COMPREHENSIVE]
+
+- id: rag-tollgate-standard-roadside
+  group: policy_qa
+  description: A full product name scopes the search.
+  turns:
+    - "Is roadside assistance included with Tollgate Standard Driver?"
+  expect:
+    route: [product_question]
+    citations_min: 1
+    citation_products: [TOLLGATE-STANDARD]
+
+- id: rag-evergreen-life-grace-period
+  group: policy_qa
+  description: The line narrows a multi-line carrier to its life product.
+  turns:
+    - "What is the grace period on the Evergreen term life policy?"
+  expect:
+    route: [product_question]
+    citations_min: 1
+    citation_products: [EVERGREEN-TERM-20]
+
+- id: rag-solace-silver-surgery
+  group: policy_qa
+  description: A plan name with a tier word cites that tier's wording only.
+  turns:
+    - "Does Solace Silver cover planned surgery straight away?"
+  expect:
+    route: [product_question]
+    citations_min: 1
+    citation_products: [SOLACE-SILVER]
+
+- id: rag-question-after-quotes
+  group: policy_qa
+  description: A policy question after quotes is answered from the named product's wording.
+  turns:
+    - "I'm 40 and want $500,000 of term life cover for 20 years"
+    - "Is suicide excluded on the Kestrel 20?"
+  expect:
+    route: [product_question]
+    quotes_max: 0
+    citation_products: [KESTREL-TERM-20]
+
+- id: rag-evergreen-auto-flood
+  group: policy_qa
+  description: An auto wording question for a carrier that sells several lines.
+  turns:
+    - "Is flood damage covered by Evergreen Auto Comprehensive?"
+  expect:
+    route: [product_question]
+    citations_min: 1
+    citation_products: [EVERGREEN-AUTO-COMPREHENSIVE]

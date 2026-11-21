@@ -1,0 +1,102 @@
+# Needs analysis: extracting facts from casual text and asking only for what is missing.
+# Expectations must hold offline (scripted model) and live (Claude); wording checks use
+# alternatives, and anything that depends on phrasing goes to the judge.
+
+- id: needs-life-asks-for-missing-details
+  group: needs_analysis
+  description: A bare request for life cover gets a short question for the missing details, no prices.
+  turns:
+    - "I'm looking for life insurance"
+  expect:
+    route: [needs_analysis, quote]
+    tools_not_called: [quote_products]
+    quotes_max: 0
+    questions_max: 2
+    reply_any_of: ["age", "how old"]
+    reply_must_not_include: ["smok", "medical history"]
+    profile: {lines: [life]}
+  judge:
+    - Asks for at most two details
+    - Does not ask about health or smoking
+
+- id: needs-life-extracts-casual-facts
+  group: needs_analysis
+  description: Age, dependants and budget are taken from one casual sentence.
+  turns:
+    - "I'm 34, married with two kids, budget around $80 a month for life cover"
+  expect:
+    route: [needs_analysis, quote]
+    quotes_max: 0
+    reply_any_of: ["cover", "years", "term"]
+    profile: {age: 34, dependents: 2, monthly_budget_minor: 8000, lines: [life]}
+  judge:
+    - Asks only for what is still missing (cover amount, term) and not for age or budget again
+
+- id: needs-life-collects-over-three-turns
+  group: needs_analysis
+  description: Facts given over several turns accumulate, and the quote follows once complete.
+  turns:
+    - "I want life insurance"
+    - "I'm 52"
+    - "$250,000 for 10 years"
+  expect:
+    tools_called: [quote_products]
+    quotes_min: 1
+    quote_products: [KESTREL-TERM-10]
+    profile: {age: 52, coverage_goal_minor: 25000000, term_years: 10}
+
+- id: needs-health-household
+  group: needs_analysis
+  description: Health needs (age, dependants, region) are understood from one message.
+  turns:
+    - "I need health insurance for my family, I'm 38 with three kids, we live in the north"
+  expect:
+    quotes_min: 1
+    profile: {age: 38, dependents: 3, region: north, lines: [health]}
+
+- id: needs-auto-driver-and-car
+  group: needs_analysis
+  description: Driver age, car type, mileage and claims history are extracted for auto.
+  turns:
+    - "Car insurance please: I'm 30, I drive a sedan, about 12,000 miles a year, no claims"
+  expect:
+    quotes_min: 1
+    profile:
+      driver_age: 30
+      vehicle_class: standard
+      annual_mileage_band: medium
+      claims_last_5y: 0
+
+- id: needs-auto-asks-car-details
+  group: needs_analysis
+  description: An auto request without details asks about the driver and the car, not prices.
+  turns:
+    - "Show me your auto insurance options"
+  expect:
+    quotes_max: 0
+    tools_not_called: [quote_products]
+    reply_any_of: ["car", "vehicle", "driver"]
+    profile: {lines: [auto]}
+
+- id: needs-health-asks-region
+  group: needs_analysis
+  description: Health questions without age or region ask for them before pricing.
+  turns:
+    - "Which health plans do you offer?"
+  expect:
+    quotes_max: 0
+    tools_not_called: [quote_products]
+    reply_any_of: ["region", "age", "old"]
+
+- id: needs-greeting
+  group: needs_analysis
+  description: A greeting gets a short offer of help, with no tools.
+  turns:
+    - "hello"
+  expect:
+    route: [greeting]
+    tools_not_called: [quote_products, search_products, search_policy_documents]
+    quotes_max: 0
+    reply_must_include: ["insurance"]
+  judge:
+    - Greets briefly and says what the assistant can help with

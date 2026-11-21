@@ -1,0 +1,372 @@
+# Channel templates (ADR-0013). `body` uses {placeholders} listed in `params`.
+# WhatsApp entries with `meta_template_name` must be created and approved in WhatsApp Manager
+# with exactly this text before they can be used outside the 24-hour window (docs/design/whatsapp.md).
+# The simulator renders `body` directly.
+
+templates:
+  - key: ai_disclosure
+    channel: web
+    locale: en
+    params: [agency_name]
+    body: >-
+      Hi! I'm PolicyPilot, an AI assistant for {agency_name} (a fictional demo agency).
+      I can help you compare life, health and auto insurance, answer questions from the policy
+      documents and prepare an application. Prices I show are estimates, and a licensed agent reviews
+      every application. Please don't share card, bank or ID numbers here. Type "agent" at any time
+      to talk to a person.
+
+  - key: ai_disclosure
+    channel: whatsapp
+    locale: en
+    params: [agency_name]
+    body: >-
+      Hi! I'm PolicyPilot, an AI assistant for {agency_name} (a fictional demo agency).
+      I can compare insurance, answer policy questions and prepare an application; a licensed agent
+      reviews every application. Prices are estimates. Please don't send card, bank or ID numbers.
+      Reply AGENT to talk to a person, or STOP to opt out.
+
+  - key: review_pending_ack
+    channel: web
+    locale: en
+    params: []
+    body: >-
+      Thanks - an agent is reviewing your request and will reply here. I've added your message to
+      the conversation so they can see it.
+
+  - key: review_pending_ack
+    channel: whatsapp
+    locale: en
+    params: []
+    body: >-
+      Thanks - an agent is reviewing your request and will reply here. I've added your message for them.
+
+  - key: application_update
+    channel: web
+    locale: en
+    params: [customer_name, status_text]
+    body: "Hi {customer_name}, an update on your application: {status_text}"
+
+  - key: application_update
+    channel: whatsapp
+    locale: en
+    params: [customer_name, status_text]
+    meta_template_name: application_update_v1
+    meta_language_code: en_US
+    category: utility
+    body: "Hi {customer_name}, an update on your insurance application: {status_text}"
+
+  - key: agent_follow_up
+    channel: whatsapp
+    locale: en
+    params: [customer_name, agent_name]
+    meta_template_name: agent_follow_up_v1
+    meta_language_code: en_US
+    category: utility
+    body: >-
+      Hi {customer_name}, {agent_name} from the agency has replied to your request. Reply to this
+      message to continue the conversation.
+
+  - key: handoff_started
+    channel: web
+    locale: en
+    params: []
+    body: >-
+      I've asked a licensed agent to join. They'll reply here as soon as they can - you can keep
+      writing in the meantime.
+
+  - key: handoff_started
+    channel: whatsapp
+    locale: en
+    params: []
+    body: I've asked a licensed agent to join. They'll reply here as soon as they can.
+
+  - key: handoff_returned
+    channel: web
+    locale: en
+    params: []
+    body: You're back with the PolicyPilot assistant. How else can I help?
+
+  - key: handoff_returned
+    channel: whatsapp
+    locale: en
+    params: []
+    body: You're back with the PolicyPilot assistant. How else can I help?
+
+  - key: out_of_scope
+    channel: web
+    locale: en
+    params: []
+    body: >-
+      I can only help with insurance from our agency: comparing life, health and auto products,
+      estimating prices, explaining policy documents, preparing an application or connecting you
+      with an agent. What would you like to do?
+
+  - key: out_of_scope
+    channel: whatsapp
+    locale: en
+    params: []
+    body: >-
+      I can only help with insurance from our agency: comparing products, estimating prices,
+      explaining policy documents, preparing an application or connecting you with an agent.
+
+  - key: sensitive_data_warning
+    channel: web
+    locale: en
+    params: []
+    body: >-
+      For your safety I've removed what looked like a card, bank or ID number from your message.
+      Please don't share those here - an agent will collect anything like that securely if needed.
+
+  - key: sensitive_data_warning
+    channel: whatsapp
+    locale: en
+    params: []
+    body: >-
+      For your safety I've removed what looked like a card, bank or ID number. Please don't send
+      those in chat - an agent will collect anything like that securely if needed.
+
+  - key: quote_fallback
+    channel: web
+    locale: en
+    params: [quote_lines]
+    body: "Here are the estimates I calculated:\n{quote_lines}"
+
+  - key: quote_fallback
+    channel: whatsapp
+    locale: en
+    params: [quote_lines]
+    body: "Here are the estimates I calculated:\n{quote_lines}"
+
+  - key: quote_disclaimer
+    channel: web
+    locale: en
+    params: []
+    body: >-
+      These prices are estimates, not offers. The final premium depends on the carrier's
+      underwriting, and a licensed agent reviews every application.
+
+  - key: quote_disclaimer
+    channel: whatsapp
+    locale: en
+    params: []
+    body: >-
+      Prices are estimates, not offers; the final premium depends on the carrier's underwriting.
+
+  - key: unsupported_content
+    channel: whatsapp
+    locale: en
+    params: []
+    body: >-
+      I can only read text messages for now. Please describe what you need in a message, or reply
+      AGENT to talk to a person.
+
+  - key: rate_limited
+    channel: web
+    locale: en
+    params: []
+    body: >-
+      The assistant has reached its usage limit for now and can't answer. Type "agent" to talk to a
+      person; an agent will reply here.
+
+  - key: rate_limited
+    channel: whatsapp
+    locale: en
+    params: []
+    body: The assistant has reached its usage limit for now. Reply AGENT to reach a person.
+
+  - key: opt_out_confirmed
+    channel: whatsapp
+    locale: en
+    params: []
+    body: You've opted out. We won't message you again unless you write to us.
+
+  - key: greeting
+    channel: web
+    locale: en
+    params: []
+    body: >-
+      Hello! I can help you compare life, health or auto insurance, explain policy terms, estimate
+      prices or prepare an application. What are you looking for?
+
+  - key: greeting
+    channel: whatsapp
+    locale: en
+    params: []
+    body: Hello! I can compare insurance, explain policy terms, estimate prices or prepare an application. What do you need?
+
+  - key: health_data_notice
+    channel: web
+    locale: en
+    params: []
+    body: >-
+      I've left out the health details you mentioned - I don't record health information in chat.
+      A licensed agent can discuss anything health-related with you privately; just type "agent".
+
+  - key: health_data_notice
+    channel: whatsapp
+    locale: en
+    params: []
+    body: >-
+      I've left out the health details you mentioned - I don't record health information in chat.
+      Reply AGENT and a licensed agent can discuss it with you privately.
+
+  - key: insufficient_evidence
+    channel: web
+    locale: en
+    params: []
+    body: >-
+      I couldn't find a clear answer to that in the policy documents, so I won't guess. A licensed
+      agent can confirm it for you - type "agent" - or ask me about another part of the policy.
+
+  - key: insufficient_evidence
+    channel: whatsapp
+    locale: en
+    params: []
+    body: >-
+      I couldn't find a clear answer in the policy documents, so I won't guess. Reply AGENT and a
+      licensed agent can confirm it for you.
+
+  - key: generic_fallback
+    channel: web
+    locale: en
+    params: []
+    body: >-
+      Sorry, I couldn't put that answer together properly. Could you rephrase it, or type "agent"
+      to talk to a person?
+
+  - key: generic_fallback
+    channel: whatsapp
+    locale: en
+    params: []
+    body: Sorry, I couldn't put that answer together properly. Could you rephrase it, or reply AGENT?
+
+  - key: feature_unavailable
+    channel: web
+    locale: en
+    params: []
+    body: >-
+      Applications and agent handoff are not available in this build yet. I can still compare
+      products, estimate prices and explain the policy terms.
+
+  - key: feature_unavailable
+    channel: whatsapp
+    locale: en
+    params: []
+    body: Applications and agent handoff are not available in this build yet. I can still compare products and explain policy terms.
+
+  - key: assistant_unavailable
+    channel: web
+    locale: en
+    params: []
+    body: >-
+      I'm having trouble answering right now. Please try again in a moment, or type "agent" to
+      talk to a person.
+
+  - key: assistant_unavailable
+    channel: whatsapp
+    locale: en
+    params: []
+    body: I'm having trouble answering right now. Please try again shortly, or reply AGENT.
+
+  - key: ask_fields
+    channel: web
+    locale: en
+    params: [fields]
+    body: "To find the right options I need a couple of details: {fields}."
+
+  - key: ask_fields
+    channel: whatsapp
+    locale: en
+    params: [fields]
+    body: "To find the right options I need a couple of details: {fields}."
+
+  # --- application and review flow (deterministic; agent-design.md#application-state-machine)
+  - key: app_need_quote
+    channel: web
+    locale: en
+    params: []
+    body: >-
+      Happy to help you apply. First, let's find the right product: tell me what kind of cover you
+      need (life, health or auto) and I'll prepare estimates.
+
+  - key: app_choose_product
+    channel: web
+    locale: en
+    params: [options]
+    body: "Which product would you like to apply for?\n{options}"
+
+  - key: app_collect_contact
+    channel: web
+    locale: en
+    params: [product, missing]
+    body: >-
+      Great choice: {product}. So that a licensed agent can follow up, please share {missing}.
+      Please don't include card, bank or ID numbers.
+
+  - key: app_consent
+    channel: web
+    locale: en
+    params: []
+    body: >-
+      Thanks. May a licensed agent from the agency contact you about this request? We use your
+      details only for this purpose (privacy notice: /privacy). Please answer yes or no.
+
+  - key: app_summary
+    channel: web
+    locale: en
+    params: [product, price, needs, contact]
+    body: "Here is your application summary:\n- Product: {product}\n- Estimate: {price}\n- Your needs: {needs}\n- Contact: {contact}\nShall I submit it for review by a licensed agent?"
+
+  - key: app_submitted
+    channel: web
+    locale: en
+    params: []
+    body: >-
+      Your application has been sent to a licensed agent for review. Nothing is binding yet - the
+      agent will check it and reply here.
+
+  - key: contact_request_done
+    channel: web
+    locale: en
+    params: []
+    body: Thank you. A licensed agent will contact you shortly.
+
+  - key: consent_declined
+    channel: web
+    locale: en
+    params: []
+    body: >-
+      No problem - I won't pass your details on. You can keep comparing products, or ask me
+      anything else about the policies.
+
+  - key: review_decision_approved
+    channel: web
+    locale: en
+    params: [note]
+    body: >-
+      Good news: a licensed agent approved your application draft. They will contact you to complete
+      it with the carrier. {note}
+
+  - key: review_decision_changes
+    channel: web
+    locale: en
+    params: [note]
+    body: "A licensed agent reviewed your application and needs a change before it can go ahead. {note} Tell me what you'd like to update."
+
+  - key: review_decision_rejected
+    channel: web
+    locale: en
+    params: [note]
+    body: "A licensed agent reviewed your application and can't take it forward. {note} You're welcome to compare other products."
+
+  - key: review_withdrawn
+    channel: web
+    locale: en
+    params: []
+    body: Your application has been withdrawn. Nothing was submitted to the carrier.
+
+  - key: review_escalated
+    channel: web
+    locale: en
+    params: []
+    body: An agent is already reviewing your request; I've marked it as a priority for them.

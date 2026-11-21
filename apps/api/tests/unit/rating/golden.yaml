@@ -1,0 +1,105 @@
+# Hand-computed premiums from data/seed/products.yaml (rate table 2026.1).
+# Changing a rate or the engine so that any value here changes must be a deliberate edit.
+# Life: premium = coverage_minor / 1000 x rate + policy_fee  (monthly)
+# Health: premium = base[band] x region_factor + dependents x dependent_minor  (monthly)
+# Auto: premium = base x driver_age x vehicle_class x mileage x claims  (annual; monthly = annual / 12)
+
+cases:
+  # ---------------------------------------------------------------- life
+  - id: kestrel-t20-40-500k
+    product: KESTREL-TERM-20
+    inputs: {line: life, age: 40, coverage_minor: 50000000}
+    premium_minor: 7500          # 50,000 x 0.140 = 7,000 + 500
+    variants: {non_smoker: 7500, smoker: 17300}   # 50,000 x 0.336 = 16,800 + 500
+  - id: evergreen-t20-40-500k
+    product: EVERGREEN-TERM-20
+    inputs: {line: life, age: 40, coverage_minor: 50000000}
+    premium_minor: 7300          # 50,000 x 0.132 = 6,600 + 700
+    variants: {non_smoker: 7300, smoker: 17850}   # 50,000 x 0.343 = 17,150 + 700
+  - id: kestrel-t10-29-band-edge
+    product: KESTREL-TERM-10
+    inputs: {line: life, age: 29, coverage_minor: 25000000}
+    premium_minor: 1500          # 25,000 x 0.040 = 1,000 + 500
+    variants: {non_smoker: 1500, smoker: 2900}    # 25,000 x 0.096 = 2,400 + 500
+  - id: kestrel-t10-30-band-edge
+    product: KESTREL-TERM-10
+    inputs: {line: life, age: 30, coverage_minor: 25000000}
+    premium_minor: 1750          # 25,000 x 0.050 = 1,250 + 500
+    variants: {non_smoker: 1750, smoker: 3500}    # 25,000 x 0.120 = 3,000 + 500
+  - id: kestrel-t30-rounding
+    product: KESTREL-TERM-30
+    inputs: {line: life, age: 35, coverage_minor: 12345600}
+    premium_minor: 1735          # 12,345.6 x 0.100 = 1,234.56 + 500 = 1,734.56 -> 1,735
+    variants: {non_smoker: 1735, smoker: 3463}    # 12,345.6 x 0.240 = 2,962.944 + 500 = 3,462.944 -> 3,463
+  - id: kestrel-t20-age-61-ineligible
+    product: KESTREL-TERM-20
+    inputs: {line: life, age: 61, coverage_minor: 50000000}
+    ineligible: [age_out_of_range]
+  - id: kestrel-t20-coverage-too-low
+    product: KESTREL-TERM-20
+    inputs: {line: life, age: 40, coverage_minor: 4000000}
+    ineligible: [coverage_out_of_range]
+  - id: kestrel-t30-age-51-and-coverage-too-high
+    product: KESTREL-TERM-30
+    inputs: {line: life, age: 51, coverage_minor: 300000000}
+    ineligible: [age_out_of_range, coverage_out_of_range]
+
+  # ---------------------------------------------------------------- health
+  - id: solace-silver-34-central-2deps
+    product: SOLACE-SILVER
+    inputs: {line: health, age: 34, region: central, dependents: 2}
+    premium_minor: 67000         # 29,000 x 1.00 + 2 x 19,000
+  - id: solace-silver-34-south-2deps
+    product: SOLACE-SILVER
+    inputs: {line: health, age: 34, region: south, dependents: 2}
+    premium_minor: 64680         # 29,000 x 0.92 = 26,680 + 38,000
+  - id: evergreen-family-34-central-2deps
+    product: EVERGREEN-SILVER-FAMILY
+    inputs: {line: health, age: 34, region: central, dependents: 2}
+    premium_minor: 62500         # 28,500 + 2 x 17,000
+  - id: solace-bronze-25-north-0deps
+    product: SOLACE-BRONZE
+    inputs: {line: health, age: 25, region: north, dependents: 0}
+    premium_minor: 18900         # 18,000 x 1.05
+  - id: solace-gold-64-north-1dep
+    product: SOLACE-GOLD
+    inputs: {line: health, age: 64, region: north, dependents: 1}
+    premium_minor: 100650        # 73,000 x 1.05 = 76,650 + 24,000
+  - id: solace-gold-65-ineligible
+    product: SOLACE-GOLD
+    inputs: {line: health, age: 65, region: north, dependents: 0}
+    ineligible: [age_out_of_range]
+  - id: solace-silver-7-deps-ineligible
+    product: SOLACE-SILVER
+    inputs: {line: health, age: 40, region: central, dependents: 7}
+    ineligible: [too_many_dependents]
+
+  # ---------------------------------------------------------------- auto
+  - id: tollgate-standard-22-standard-medium-0
+    product: TOLLGATE-STANDARD
+    inputs: {line: auto, driver_age: 22, vehicle_class: standard, annual_mileage_band: medium, claims_last_5y: 0}
+    premium_minor: 162800        # 88,000 x 1.85
+    monthly_equivalent_minor: 13567   # 162,800 / 12 = 13,566.67
+  - id: tollgate-standard-45-suv-high-1
+    product: TOLLGATE-STANDARD
+    inputs: {line: auto, driver_age: 45, vehicle_class: suv, annual_mileage_band: high, claims_last_5y: 1}
+    premium_minor: 151800        # 88,000 x 1.00 x 1.15 x 1.20 x 1.25
+    monthly_equivalent_minor: 12650
+  - id: evergreen-auto-standard-22-standard-medium-0
+    product: EVERGREEN-AUTO-STANDARD
+    inputs: {line: auto, driver_age: 22, vehicle_class: standard, annual_mileage_band: medium, claims_last_5y: 0}
+    premium_minor: 159250        # 91,000 x 1.75
+    monthly_equivalent_minor: 13271   # 13,270.83
+  - id: tollgate-liability-70-economy-low-3claims
+    product: TOLLGATE-LIABILITY
+    inputs: {line: auto, driver_age: 70, vehicle_class: economy, annual_mileage_band: low, claims_last_5y: 3}
+    premium_minor: 77501         # 52,000 x 1.15 x 0.90 x 0.90 x 1.60 = 77,500.8 -> 77,501
+    monthly_equivalent_minor: 6458    # 6,458.42
+  - id: evergreen-auto-4-claims-ineligible
+    product: EVERGREEN-AUTO-COMPREHENSIVE
+    inputs: {line: auto, driver_age: 40, vehicle_class: standard, annual_mileage_band: low, claims_last_5y: 4}
+    ineligible: [too_many_claims]
+  - id: tollgate-17-ineligible
+    product: TOLLGATE-COMPREHENSIVE
+    inputs: {line: auto, driver_age: 17, vehicle_class: standard, annual_mileage_band: low, claims_last_5y: 0}
+    ineligible: [driver_age_out_of_range]

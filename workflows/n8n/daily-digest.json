@@ -1,0 +1,122 @@
+{
+  "id": "pp-daily-digest",
+  "name": "PolicyPilot: daily digest",
+  "nodes": [
+    {
+      "id": "dd26868d-7c33-584a-9dde-a1d17a7ec8cb",
+      "name": "Daily at 08:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "f47541e2-a5c3-5890-8636-280b06c8226f",
+      "name": "Get yesterday's digest",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        300
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pp-api-token",
+          "name": "PolicyPilot integrations API token"
+        }
+      },
+      "parameters": {
+        "method": "GET",
+        "url": "__POLICYPILOT_API_URL__/api/v1/integrations/digest",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 10000
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "date",
+              "value": "={{ $today.minus({ days: 1 }).toISODate() }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "f0748056-04ca-5058-924c-d17877dd2521",
+      "name": "Email the digest",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        440,
+        300
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "pp-smtp-mailpit",
+          "name": "PolicyPilot SMTP"
+        }
+      },
+      "parameters": {
+        "fromEmail": "PolicyPilot <no-reply@policypilot.test>",
+        "toEmail": "__AGENCY_INBOX__",
+        "subject": "=PolicyPilot daily digest {{ $json.date }}",
+        "emailFormat": "text",
+        "text": "=PolicyPilot daily digest for {{ $json.date }}\n\nConversations started: {{ $json.conversations }}\nLeads created: {{ $json.leads }}\nApplications by status: {{ Object.entries($json.applicationsByStatus).map(([status, count]) => status + ' ' + count).join(', ') || 'none' }}\nOpen reviews now: {{ $json.openReviews }}\nRuns that used the fallback model: {{ $json.fallbackRuns }}\nDead-lettered events: {{ $json.deadLetteredEvents }}\n\nDashboard: __APP_BASE_URL__/agent\n\nSent by the PolicyPilot daily digest workflow.",
+        "options": {
+          "appendAttribution": false
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Daily at 08:00": {
+      "main": [
+        [
+          {
+            "node": "Get yesterday's digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get yesterday's digest": {
+      "main": [
+        [
+          {
+            "node": "Email the digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": false,
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "all",
+    "timezone": "UTC"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}

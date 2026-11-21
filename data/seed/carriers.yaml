@@ -1,0 +1,24 @@
+# Fictional carriers. Names were chosen to avoid real insurers; any resemblance is accidental.
+agency:
+  name: Harbor & Pine Insurance Agency
+  locale: en-US
+  currency: USD
+  inbox: agents@policypilot.test
+
+carriers:
+  - code: KESTREL
+    name: Kestrel Life Assurance
+    financial_strength: "A (fictional rating)"
+    website: https://kestrel-life.example.com
+  - code: SOLACE
+    name: Solace Health Cooperative
+    financial_strength: "A- (fictional rating)"
+    website: https://solace-health.example.com
+  - code: TOLLGATE
+    name: Tollgate Auto Insurance
+    financial_strength: "B+ (fictional rating)"
+    website: https://tollgate-auto.example.com
+  - code: EVERGREEN
+    name: Evergreen Mutual
+    financial_strength: "A (fictional rating)"
+    website: https://evergreen-mutual.example.com

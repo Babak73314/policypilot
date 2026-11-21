@@ -1,0 +1,347 @@
+{
+  "app": {
+    "name": "PolicyPilot"
+  },
+  "documentTitle": "{{page}} · PolicyPilot",
+  "nav": {
+    "privacy": "Privacy"
+  },
+  "common": {
+    "loading": "Loading…",
+    "retry": "Retry",
+    "dismiss": "Dismiss",
+    "tryAgain": "Try again"
+  },
+  "errors": {
+    "backHome": "Back to the chat",
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "This page does not exist.",
+    "crashTitle": "Something went wrong",
+    "crashBody": "The page hit an unexpected error. Reload it, or start again from the chat."
+  },
+  "lines": {
+    "life": "Life",
+    "health": "Health",
+    "auto": "Auto"
+  },
+  "status": {
+    "open": "Open",
+    "claimed": "Claimed",
+    "resolving": "Resolving",
+    "resolved": "Resolved",
+    "active": "Active",
+    "awaiting_review": "Awaiting review",
+    "human_takeover": "With an agent",
+    "closed": "Closed",
+    "draft": "Draft",
+    "pending_review": "Pending review",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "changes_requested": "Changes requested",
+    "withdrawn": "Withdrawn",
+    "expired": "Expired",
+    "new": "New",
+    "contacted": "Contacted",
+    "qualified": "Qualified",
+    "won": "Won",
+    "lost": "Lost",
+    "running": "Running",
+    "completed": "Completed",
+    "failed": "Failed",
+    "ok": "OK",
+    "error": "Error"
+  },
+  "chat": {
+    "pageTitle": "Chat",
+    "subtitle": "AI assistant for Harbor & Pine Insurance Agency (fictional demo)",
+    "startOver": "Start over",
+    "demoBanner": "Demo mode: no AI model is connected, so a scripted assistant answers. Quotes still come from the real rating engine.",
+    "starting": "Starting a conversation…",
+    "startFailed": "The assistant could not be reached.",
+    "transcript": "Conversation",
+    "thinking": "Thinking…",
+    "fromAgent": "Licensed agent",
+    "sources_one": "{{count}} source from the policy wording",
+    "sources_other": "{{count}} sources from the policy wording",
+    "citation": "{{document}}, section {{section}}, page {{pages}}",
+    "quickReplies": "Suggested replies",
+    "awaitingReview": "A licensed agent is reviewing your application. Their decision will appear here, and you can leave this page and come back.",
+    "humanTakeover": "You are now talking to a person from the agency. Their replies will appear here.",
+    "closed": "This conversation is closed. Start over to begin a new one.",
+    "checkForUpdates": "Check for updates",
+    "inputLabel": "Your message",
+    "placeholder": "Ask about life, health or auto cover…",
+    "send": "Send",
+    "tooLong": "Messages can be at most {{max}} characters.",
+    "footerNote": "Quotes are estimates from carrier rate tables. A licensed agent approves every application.",
+    "errors": {
+      "turn_in_progress": "Still working on your previous message.",
+      "message_too_long": "That message is too long.",
+      "rate_limited": "Too many messages at once. Wait a moment, then retry.",
+      "network": "Connection lost. Your message was not confirmed.",
+      "conversation_closed": "This conversation is closed.",
+      "turn_failed": "The assistant could not answer that message.",
+      "server_error": "The assistant could not answer that message.",
+      "unknown": "Something went wrong with that message.",
+      "overloaded": "The assistant is very busy. Wait a moment, then retry."
+    }
+  },
+  "quote": {
+    "ariaLabel": "Quote for {{product}}",
+    "overBudget": "Over budget",
+    "monthlyEquivalent": "About {{amount}} per month",
+    "howCalculated": "How this price is calculated",
+    "validUntil": "Estimate valid until {{date}}"
+  },
+  "comparison": {
+    "caption": "Product comparison",
+    "attribute": "Feature"
+  },
+  "simulator": {
+    "pageTitle": "WhatsApp simulator",
+    "heading": "WhatsApp simulator",
+    "intro": "A local stand-in for a phone on the WhatsApp Business Platform. Messages go through the real webhook path, signed with the local app secret, and replies appear as the API sends them.",
+    "phone": "Simulated phone",
+    "contactName": "Harbor & Pine (demo)",
+    "businessAccount": "Business account",
+    "inputLabel": "Message",
+    "placeholder": "Message",
+    "send": "Send",
+    "userId": "Simulated user",
+    "displayName": "Display name",
+    "advanceClock": "Advance clock 25 h",
+    "clockAdvanced": "(25 hours later: the 24-hour service window has closed)",
+    "newUser": "New simulated user",
+    "pollingPaused": "Checking for replies paused after 15 minutes without activity.",
+    "resume": "Resume",
+    "sendFailed": "The message could not be sent to the API.",
+    "templateLabel": "Template: {{name}}",
+    "tipSigned": "Each message is signed like a Meta delivery and accepted durably before processing.",
+    "tipWindow": "After \"Advance clock\", replies are sent as an approved template, as Meta requires outside the 24-hour window.",
+    "tipStop": "Send STOP to opt out.",
+    "unavailableTitle": "The simulator is not available",
+    "unavailableBody": "It only runs locally with WHATSAPP_MODE=simulator."
+  },
+  "privacy": {
+    "pageTitle": "Privacy",
+    "back": "Back to the chat",
+    "heading": "Privacy notice (demo)",
+    "intro": "PolicyPilot is a portfolio demo for a fictional insurance agency. Do not enter real personal information. This notice describes how the software handles data so the design can be reviewed.",
+    "sections": {
+      "who": {
+        "title": "Who runs this assistant",
+        "body": "Harbor & Pine Insurance Agency is fictional, and so are its carriers, products and rates. The assistant is an AI that gives information and estimates; licensed agents handle advice and approve every application."
+      },
+      "what": {
+        "title": "What is stored",
+        "body": "Your messages, after card, bank, ID numbers and health details are removed; the needs you describe; quotes; and, only if you apply or ask to be contacted, your name and contact details together with a record of your consent."
+      },
+      "models": {
+        "title": "AI models",
+        "body": "Replies are written by a language model through the Claude API, with an OpenAI model as a fallback when it is enabled. Your contact details are never sent to a model. Prices are never produced by a model; they come from the rating engine."
+      },
+      "retention": {
+        "title": "How long data is kept",
+        "body": "Inactive conversations close after 30 days, pending reviews expire after 14 days, closed conversations are deleted after 180 days, and sales records after 24 months unless the sale was won."
+      },
+      "rights": {
+        "title": "Your rights",
+        "body": "The agency can export or erase everything stored about a conversation, including the assistant's working memory. Erasure also signs out every device that holds the conversation."
+      },
+      "demo": {
+        "title": "This demo",
+        "body": "Without an API key the assistant is a scripted demo and no data leaves the machine it runs on. WhatsApp messages in the simulator never reach Meta."
+      }
+    }
+  },
+  "agent": {
+    "title": "Agent desk",
+    "navLabel": "Dashboard sections",
+    "nav": {
+      "overview": "Overview",
+      "reviews": "Reviews",
+      "conversations": "Conversations",
+      "leads": "Leads",
+      "catalog": "Catalog",
+      "outbox": "Outbox"
+    },
+    "logout": "Sign out",
+    "pollingPaused": "Auto-refresh paused after 15 minutes without activity.",
+    "refreshNow": "Resume",
+    "loadFailed": "Could not load this data.",
+    "nothingRecorded": "Nothing recorded.",
+    "none": "None yet.",
+    "nobody": "nobody",
+    "status": "Status",
+    "channel": "Channel",
+    "created": "Created",
+    "allStatuses": "All statuses",
+    "allKinds": "All kinds",
+    "allChannels": "All channels",
+    "channels": {
+      "web": "Web",
+      "whatsapp": "WhatsApp"
+    },
+    "kind": {
+      "application_review": "Application review",
+      "handoff": "Handoff"
+    },
+    "roles": {
+      "customer": "Customer",
+      "assistant": "Assistant",
+      "agent": "Agent",
+      "system": "System"
+    },
+    "login": {
+      "pageTitle": "Sign in",
+      "heading": "Agent sign-in",
+      "hint": "The demo agent is created by the seed (SEED_AGENT_EMAIL and SEED_AGENT_PASSWORD in .env).",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "signingIn": "Signing in…",
+      "invalid": "Wrong email or password.",
+      "rateLimited": "Too many attempts. Wait a minute and try again.",
+      "failed": "Sign-in failed. Try again."
+    },
+    "overview": {
+      "heading": "Overview",
+      "openReviews": "Open reviews",
+      "avgReview": "Average review time",
+      "minutes": "{{value}} min",
+      "leadsToday": "Leads today",
+      "runsToday": "Assistant runs today",
+      "errorRate": "Error rate today",
+      "fallbackRate": "Fallback rate today",
+      "modelCalls": "Model calls today",
+      "ofLimit": "{{value}} of {{limit}}",
+      "deadLetters": "Undelivered events",
+      "applications": "Applications",
+      "guardrails": "Guardrail actions (7 days)",
+      "whatsapp": "WhatsApp messages this month",
+      "whatsappHint": "Meta charges per delivered message; utility templates are charged even inside the window."
+    },
+    "reviews": {
+      "heading": "Review queue",
+      "filterStatus": "Filter by status",
+      "filterKind": "Filter by kind",
+      "empty": "No review tasks match.",
+      "kind": "Kind",
+      "summary": "Summary",
+      "claimedBy": "Claimed by",
+      "priority": "Priority"
+    },
+    "review": {
+      "pageTitle": "Review",
+      "back": "← Review queue",
+      "openConversation": "Open conversation",
+      "summary": "Summary",
+      "meta": "{{channel}} · opened {{created}} · claimed by {{claimedBy}}",
+      "snapshot": "Application snapshot, version {{version}}",
+      "applicant": "Applicant",
+      "needs": "Needs profile",
+      "messages": "Customer messages since the review opened",
+      "claim": "Claim this review",
+      "decide": "Decision",
+      "notes": "Note to the customer (added to the decision message)",
+      "clerical": "Correct contact details",
+      "clericalHint": "Clerical fixes only: name, email and phone. Anything else needs Request changes.",
+      "fields": {
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone"
+      },
+      "actions": {
+        "approve": "Approve",
+        "edit_and_approve": "Approve with corrections",
+        "request_changes": "Request changes",
+        "reject": "Reject",
+        "return_to_assistant": "Hand back to the assistant",
+        "close": "Close conversation"
+      },
+      "binding": "Approving confirms the quote shown in the snapshot. Nothing is binding until you do.",
+      "resolved": "Decision saved and sent to the customer.",
+      "reply": "Reply to the customer",
+      "sendReply": "Send reply",
+      "replySent": "Reply sent.",
+      "windowClosed": "The WhatsApp 24-hour window is closed; a free-form reply cannot be delivered.",
+      "stuckTitle": "Resume did not finish",
+      "stuckBody": "The decision is saved but the conversation did not resume. Retrying is safe.",
+      "retryResume": "Retry resume",
+      "outcome": "Outcome",
+      "errors": {
+        "review_not_claimable": "Someone else already claimed or resolved this review.",
+        "review_not_resolvable": "This review is already being resolved.",
+        "requires_customer_confirmation": "Only name, email and phone can be corrected here. Request changes for anything else.",
+        "quote_expired": "The quote has expired. Request changes so the customer gets a fresh quote.",
+        "invalid_action": "That action is not valid for this review.",
+        "conversation_busy": "The customer is sending a message right now. Try again in a moment.",
+        "resume_failed": "The decision is saved, but resuming failed. Use retry.",
+        "not_in_takeover": "Replies are only possible while you hold the conversation.",
+        "whatsapp_window_closed": "The WhatsApp window is closed.",
+        "generic": "That did not work. Reload and try again.",
+        "edits_need_edit_and_approve": "Corrections can only be sent with Approve with corrections."
+      }
+    },
+    "conversations": {
+      "heading": "Conversations",
+      "empty": "No conversations match.",
+      "customer": "Customer",
+      "anonymous": "Anonymous",
+      "messages": "Messages",
+      "lastActivity": "Last activity"
+    },
+    "conversation": {
+      "pageTitle": "Conversation",
+      "back": "← Conversations",
+      "transcript": "Transcript",
+      "profile": "Needs profile",
+      "applications": "Applications",
+      "quotes_one": "{{count}} quote",
+      "quotes_other": "{{count}} quotes",
+      "runs": "Assistant runs"
+    },
+    "run": {
+      "fallback": "fallback model",
+      "tokens": "{{input}} in / {{output}} out tokens",
+      "guardrails": "Guardrails: {{actions}}"
+    },
+    "leads": {
+      "heading": "Leads",
+      "empty": "No leads yet.",
+      "customer": "Customer",
+      "kind": "Kind",
+      "kinds": {
+        "application": "Application",
+        "contact_request": "Contact request"
+      },
+      "interest": "Interest",
+      "source": "Source",
+      "nextFollowUp": "Next follow-up",
+      "changeStatus": "Change lead status",
+      "updateFailed": "The lead could not be updated.",
+      "consentGiven": "Consent to contact: {{date}}",
+      "noConsent": "No consent to contact on record"
+    },
+    "catalog": {
+      "heading": "Catalog",
+      "product": "Product",
+      "line": "Line",
+      "carrier": "Carrier",
+      "pick": "Pick a product to see its attributes and rate tables.",
+      "rateTables": "Rate tables",
+      "version": "Version {{version}}, {{from}} to {{to}}",
+      "openEnded": "open-ended"
+    },
+    "outbox": {
+      "heading": "Event outbox",
+      "intro": "Events for n8n are delivered at least once, with backoff. Dead letters failed every attempt; retrying puts them back in the queue.",
+      "dead": "Dead letters",
+      "pending": "Pending",
+      "empty": "Nothing here.",
+      "event": "Event",
+      "attempts": "Attempts",
+      "lastError": "Last error"
+    }
+  }
+}

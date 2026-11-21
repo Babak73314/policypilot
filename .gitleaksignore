@@ -1,0 +1,3 @@
+# Test-only values that gitleaks' generic-api-key rule flags. Current lines carry an inline
+# "gitleaks:allow" comment; this entry covers the commit that added the value before that.
+0165d607a23e5c420715ebec94a8ac471bb64e50:apps/api/tests/conftest.py:generic-api-key:57

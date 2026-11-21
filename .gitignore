@@ -1,0 +1,43 @@
+# Research input (Persian report) - never commit
+*.pdf
+!data/seed/**/*.pdf
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# Node
+node_modules/
+apps/web/dist/
+*.tsbuildinfo
+
+# Env and secrets
+.env
+.env.*
+!.env.example
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local data
+*.log
+.data/
+
+# Local Claude Code session config
+.claude/
+
+# Eval reports (a reviewed summary of a live run goes to docs/evals/ by hand)
+apps/api/evals/reports/

@@ -1,0 +1,406 @@
+{
+  "id": "pp-events-router",
+  "name": "PolicyPilot: events router",
+  "nodes": [
+    {
+      "id": "a33c1254-e882-5606-80eb-c8ab73f2d027",
+      "name": "Receive event",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        300
+      ],
+      "webhookId": "5b0c8a52-6f0e-4d7e-9a8c-2f6d8f0e7a01",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pp-webhook-auth",
+          "name": "PolicyPilot event webhook token"
+        }
+      },
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "policypilot-events",
+        "authentication": "headerAuth",
+        "responseMode": "lastNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "04d9b7cb-c754-5d98-85b9-c58a44880962",
+      "name": "Drop repeats",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ],
+      "parameters": {
+        "jsCode": "// Delivery is at-least-once, so the same event can arrive twice (docs/design/n8n.md).\n// Best-effort deduplication: the IDs of the last 500 handled events live in workflow static data.\n// An ID is remembered only after its notification was sent (node \"Remember event\").\nconst seen = $getWorkflowStaticData('global').seen ?? [];\nreturn $input.all().map((item) => {\n  const body = item.json.body ?? {};\n  const eventId = item.json.headers['x-policypilot-event-id'] ?? body.id;\n  return { json: { ...body, eventId, duplicate: seen.includes(eventId) } };\n});"
+      }
+    },
+    {
+      "id": "c7346d77-8459-5cfa-a181-48b50a13ca74",
+      "name": "Route by type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        440,
+        300
+      ],
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b788701c-4e98-53be-b5ff-feeacb448e30",
+                    "leftValue": "={{ $json.duplicate }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "duplicate"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a18546c1-58de-58ca-b716-b27c7f66674d",
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "lead.created",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "lead.created"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "daaf4253-36bd-568b-8563-d341b3a779d0",
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "application.submitted",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "application.submitted"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "5fb6119e-4a6e-5a1d-9e62-6328d6ffdd7d",
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "handoff.requested",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "handoff.requested"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "other events"
+        }
+      }
+    },
+    {
+      "id": "40f71acd-d453-5ce1-9736-4132df437a87",
+      "name": "Email: new lead",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        720,
+        140
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "pp-smtp-mailpit",
+          "name": "PolicyPilot SMTP"
+        }
+      },
+      "parameters": {
+        "fromEmail": "PolicyPilot <no-reply@policypilot.test>",
+        "toEmail": "__AGENCY_INBOX__",
+        "subject": "=New lead from {{ $json.data.source }}",
+        "emailFormat": "text",
+        "text": "=A new lead was created.\n\nLead: {{ $json.data.leadId }}\nKind: {{ $json.data.kind }}\nSource: {{ $json.data.source }}\nInterested in: {{ ($json.data.lineInterest || []).join(', ') || 'not stated' }}\nCustomer first name: {{ $json.data.customerDisplayName || 'not given' }}\n\nOpen: __APP_BASE_URL__{{ $json.links.dashboard }}\n\nEvent {{ $json.eventId }} ({{ $json.type }}) at {{ $json.occurredAt }}.\nSent by the PolicyPilot events router workflow.",
+        "options": {
+          "appendAttribution": false
+        }
+      }
+    },
+    {
+      "id": "0e5550d9-b1aa-59ce-848a-ae9391904c08",
+      "name": "Email: review needed",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        720,
+        300
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "pp-smtp-mailpit",
+          "name": "PolicyPilot SMTP"
+        }
+      },
+      "parameters": {
+        "fromEmail": "PolicyPilot <no-reply@policypilot.test>",
+        "toEmail": "__AGENCY_INBOX__",
+        "subject": "=Review needed: {{ $json.data.productName || 'application' }}",
+        "emailFormat": "text",
+        "text": "=An application is waiting for a licensed agent's review. Nothing binding reaches the customer before a human approves it.\n\nApplication: {{ $json.data.applicationId }}\nProduct: {{ $json.data.productName }}\nChannel: {{ $json.data.channel }}\n\nReview it: __APP_BASE_URL__{{ $json.links.dashboard }}\n\nEvent {{ $json.eventId }} ({{ $json.type }}) at {{ $json.occurredAt }}.\nSent by the PolicyPilot events router workflow.",
+        "options": {
+          "appendAttribution": false
+        }
+      }
+    },
+    {
+      "id": "17332750-603e-50f0-912f-bfab9857be9b",
+      "name": "Email: handoff requested",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        720,
+        460
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "pp-smtp-mailpit",
+          "name": "PolicyPilot SMTP"
+        }
+      },
+      "parameters": {
+        "fromEmail": "PolicyPilot <no-reply@policypilot.test>",
+        "toEmail": "__AGENCY_INBOX__",
+        "subject": "=[High priority] A customer asked for a person ({{ $json.data.channel }})",
+        "emailFormat": "text",
+        "text": "=A customer asked to talk to a person. The assistant has paused this conversation until an agent replies or hands it back.\n\nConversation: {{ $json.data.conversationId }}\nReason: {{ $json.data.reason }}\nPriority: {{ $json.data.priority }}\n\nTake over: __APP_BASE_URL__{{ $json.links.dashboard }}\n\nEvent {{ $json.eventId }} ({{ $json.type }}) at {{ $json.occurredAt }}.\nSent by the PolicyPilot events router workflow.",
+        "options": {
+          "appendAttribution": false
+        }
+      }
+    },
+    {
+      "id": "baeaeb2a-e222-5987-880b-5165f1a98752",
+      "name": "Slack: handoff (disabled)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        880,
+        460
+      ],
+      "disabled": true,
+      "parameters": {}
+    },
+    {
+      "id": "297c494d-9ccb-55b8-939f-ecfc97b4c996",
+      "name": "Remember event",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1000,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\nconst seen = staticData.seen ?? [];\nconst eventId = $('Drop repeats').first().json.eventId;\nif (eventId && !seen.includes(eventId)) seen.push(eventId);\nstaticData.seen = seen.slice(-500);\nreturn [{ json: { received: true, eventId } }];"
+      }
+    },
+    {
+      "id": "ee2387ea-fd44-5e4d-b60f-dab797476cce",
+      "name": "Note: events router",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        -60
+      ],
+      "parameters": {
+        "content": "## PolicyPilot events router\nThe API POSTs every outbox event here with `X-PolicyPilot-Token` (header auth) and `X-PolicyPilot-Event-Id`.\n\n- Repeats stop at the switch.\n- `application.reviewed` and `handoff.resolved` need no email. A CRM update would go on the *other events* branch (Phase 2).\n- If an email fails, the execution fails, the webhook answers 500 and the API retries with backoff.",
+        "width": 520,
+        "height": 260
+      }
+    },
+    {
+      "id": "7b7fe737-3238-5d2a-82b1-0f17c109f7f2",
+      "name": "Note: Slack",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        760,
+        600
+      ],
+      "parameters": {
+        "content": "### Slack (optional)\nReplace the disabled placeholder (it passes items through) with a Slack node, select your Slack credential and enable it to post handoff alerts to a channel.",
+        "width": 360,
+        "height": 160
+      }
+    }
+  ],
+  "connections": {
+    "Receive event": {
+      "main": [
+        [
+          {
+            "node": "Drop repeats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drop repeats": {
+      "main": [
+        [
+          {
+            "node": "Route by type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by type": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Email: new lead",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email: review needed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email: handoff requested",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Remember event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email: new lead": {
+      "main": [
+        [
+          {
+            "node": "Remember event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email: review needed": {
+      "main": [
+        [
+          {
+            "node": "Remember event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email: handoff requested": {
+      "main": [
+        [
+          {
+            "node": "Slack: handoff (disabled)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack: handoff (disabled)": {
+      "main": [
+        [
+          {
+            "node": "Remember event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": false,
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "all",
+    "timezone": "UTC"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}

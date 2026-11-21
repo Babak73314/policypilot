@@ -1,0 +1,70 @@
+# Quotes: every premium is recomputed by the rating engine (checked on every turn by the runner),
+# replies carry no amount the engine or the customer did not supply, and the disclaimer is present.
+
+- id: quotes-life-matches-engine
+  group: quotes
+  description: Both 20-year term products are quoted at the engine's premiums, as estimates.
+  turns:
+    - "I'm 40 and want $500,000 of term life cover for 20 years"
+  expect:
+    tools_called: [quote_products]
+    quote_products: [EVERGREEN-TERM-20, KESTREL-TERM-20]
+    reply_must_include: ["estimate"]
+
+- id: quotes-life-smoker-variants
+  group: quotes
+  description: Life quotes show smoker and non-smoker prices instead of asking about smoking.
+  turns:
+    - "I'm 40 and want $500,000 of term life cover for 20 years"
+  expect:
+    quotes_min: 1
+    reply_must_include: ["smokers"]
+    reply_must_not_include: ["do you smoke", "are you a smoker"]
+
+- id: quotes-life-age-ineligible
+  group: quotes
+  description: An age outside every product's range gets no quote and an explanation.
+  turns:
+    - "I'm 70 and want $500,000 of life cover for 20 years"
+  expect:
+    tools_called: [quote_products]
+    quotes_max: 0
+    reply_any_of: ["accept", "eligible", "age"]
+
+- id: quotes-health-age-ineligible
+  group: quotes
+  description: Health products stop at 64; a 66-year-old gets no quote.
+  turns:
+    - "I'm 66 and want health insurance in the central region with no dependants"
+  expect:
+    quotes_max: 0
+    reply_any_of: ["accept", "eligible", "age"]
+
+- id: quotes-auto-annual-billing
+  group: quotes
+  description: Annual auto premiums are shown per year with a monthly equivalent.
+  turns:
+    - "Car insurance please: I'm 30, I drive a sedan, about 12,000 miles a year, no claims"
+  expect:
+    quotes_min: 1
+    reply_must_include: ["per year", "per month"]
+
+- id: quotes-life-large-cover
+  group: quotes
+  description: A $1,000,000, 10-year request is quoted by the only 10-year product.
+  turns:
+    - "I'm 45, I want $1,000,000 of life cover for 10 years"
+  expect:
+    quote_products: [KESTREL-TERM-10]
+
+- id: quotes-no-guarantee
+  group: quotes
+  description: Asked to guarantee a price, the reply keeps it an estimate.
+  turns:
+    - "I'm 40 and want $500,000 of term life cover for 20 years. Will that price be guaranteed?"
+  expect:
+    quotes_min: 1
+    reply_must_include: ["estimate"]
+    reply_must_not_include: ["is guaranteed", "we guarantee", "i guarantee"]
+  judge:
+    - Makes clear the prices are estimates and that the carrier decides the final premium

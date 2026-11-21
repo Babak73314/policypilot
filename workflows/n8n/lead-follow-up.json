@@ -1,0 +1,201 @@
+{
+  "id": "pp-lead-follow-up",
+  "name": "PolicyPilot: lead follow-up",
+  "nodes": [
+    {
+      "id": "b20743a2-985a-56dd-a215-c0692e671f02",
+      "name": "At 08:00 and 14:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8,14 * * *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0f001a75-a1f2-58d9-a4f2-239aaaa56b35",
+      "name": "Get follow-ups due",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        300
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pp-api-token",
+          "name": "PolicyPilot integrations API token"
+        }
+      },
+      "parameters": {
+        "method": "GET",
+        "url": "__POLICYPILOT_API_URL__/api/v1/integrations/leads/follow-ups-due",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 10000
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "before",
+              "value": "={{ $now.toISO() }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "35ee3828-7c53-5560-9065-69baa6aadcfc",
+      "name": "One item per lead",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        440,
+        300
+      ],
+      "parameters": {
+        "fieldToSplitOut": "items",
+        "options": {}
+      }
+    },
+    {
+      "id": "78b52fc6-d8f3-5387-8c80-b59ac32db1b9",
+      "name": "Email the agent",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        660,
+        300
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "pp-smtp-mailpit",
+          "name": "PolicyPilot SMTP"
+        }
+      },
+      "parameters": {
+        "fromEmail": "PolicyPilot <no-reply@policypilot.test>",
+        "toEmail": "={{ $json.assignedAgentEmail || '__AGENCY_INBOX__' }}",
+        "subject": "=Follow up with lead {{ $json.leadId }}",
+        "emailFormat": "text",
+        "text": "=This lead is due for a follow-up.\n\nLead: {{ $json.leadId }}\nInterested in: {{ ($json.lineInterest || []).join(', ') || 'not stated' }}\nCreated: {{ $json.createdAt }}\n\nOpen: __APP_BASE_URL__/agent/leads/{{ $json.leadId }}\n\nSent by the PolicyPilot lead follow-up workflow.",
+        "options": {
+          "appendAttribution": false
+        }
+      }
+    },
+    {
+      "id": "9ba29c3a-89e0-5d27-a404-35af2f8a013c",
+      "name": "Record the follow-up",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        300
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pp-api-token",
+          "name": "PolicyPilot integrations API token"
+        }
+      },
+      "parameters": {
+        "method": "POST",
+        "url": "=__POLICYPILOT_API_URL__/api/v1/integrations/leads/{{ $('One item per lead').item.json.leadId }}/follow-ups",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 10000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ occurrenceId: $execution.id + ':' + $('One item per lead').item.json.leadId, channel: 'email' }) }}"
+      }
+    },
+    {
+      "id": "1920212f-273b-5d40-9fe1-48cbd9f912d9",
+      "name": "Note: follow-up",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        -40
+      ],
+      "parameters": {
+        "content": "## Lead follow-up\nRuns at 08:00 and 14:00 UTC, kept infrequent so a shared database can pause.\n\nThe API records each follow-up once per `occurrenceId = <execution id>:<lead id>`, so a retried execution cannot move the next follow-up date twice.",
+        "width": 460,
+        "height": 220
+      }
+    }
+  ],
+  "connections": {
+    "At 08:00 and 14:00": {
+      "main": [
+        [
+          {
+            "node": "Get follow-ups due",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get follow-ups due": {
+      "main": [
+        [
+          {
+            "node": "One item per lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "One item per lead": {
+      "main": [
+        [
+          {
+            "node": "Email the agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email the agent": {
+      "main": [
+        [
+          {
+            "node": "Record the follow-up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": false,
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "all",
+    "timezone": "UTC"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}

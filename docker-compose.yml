@@ -1,0 +1,157 @@
+# PolicyPilot local stack.
+#   python scripts/init_env.py      # once: writes .env with fresh local secrets
+#   docker compose up --build -d
+# Every published port is bound to 127.0.0.1. Start order: db -> migrate -> seed -> api, and
+# db -> n8n-import -> n8n (docs/design/n8n.md).
+name: policypilot
+
+# migrate, seed and api share one image. Only `migrate` builds it; the other two never pull it.
+x-api-image: &api-image
+  image: policypilot-api:local
+  pull_policy: never
+  env_file: .env
+  environment:
+    # Containers build their own URL; DATABASE_URL in .env is for tools on the host.
+    DATABASE_URL: postgresql+psycopg://policypilot:${POLICYPILOT_DB_PASSWORD:-}@db:5432/policypilot
+    N8N_EVENTS_URL: http://n8n:5678/webhook/policypilot-events
+
+x-n8n-env: &n8n-env
+  DB_TYPE: postgresdb
+  DB_POSTGRESDB_HOST: db
+  DB_POSTGRESDB_PORT: "5432"
+  DB_POSTGRESDB_DATABASE: n8n
+  DB_POSTGRESDB_USER: n8n
+  DB_POSTGRESDB_PASSWORD: ${N8N_DB_PASSWORD:-}
+  DB_POSTGRESDB_SCHEMA: public
+  N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:-}
+  GENERIC_TIMEZONE: UTC
+  TZ: UTC
+  N8N_DIAGNOSTICS_ENABLED: "false"
+  N8N_VERSION_NOTIFICATIONS_ENABLED: "false"
+  N8N_PERSONALIZATION_ENABLED: "false"
+
+services:
+  db:
+    image: pgvector/pgvector:0.8.7-pg16-trixie
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
+      POLICYPILOT_DB_PASSWORD: ${POLICYPILOT_DB_PASSWORD:-}
+      N8N_DB_PASSWORD: ${N8N_DB_PASSWORD:-}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init.sh:/docker-entrypoint-initdb.d/10-init.sh:ro
+    ports:
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
+    healthcheck:
+      # Over TCP on purpose: on the first start the image runs a temporary, socket-only server
+      # while init scripts run, and a socket check would report healthy too early.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d policypilot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  # One-shot: Alembic migrations and the LangGraph checkpoint tables.
+  migrate:
+    <<: *api-image
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    pull_policy: build
+    command: ["policypilot", "db", "upgrade"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  # One-shot and idempotent: catalog, policy documents and embeddings, demo agent, local tokens.
+  seed:
+    <<: *api-image
+    command: ["policypilot", "seed"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: "no"
+
+  api:
+    <<: *api-image
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  # The web app (chat, simulator, privacy, agent dashboard) and the single public entry point:
+  # nginx serves the build and proxies /api, /webhooks, /mcp, /dev, /healthz and /readyz.
+  web:
+    build:
+      context: apps/web
+    image: policypilot-web:local
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      api:
+        condition: service_started
+    restart: unless-stopped
+
+  # One-shot: credentials and workflows with fixed IDs, imported and published before n8n starts.
+  n8n-import:
+    image: n8nio/n8n:2.48.6
+    entrypoint: ["/bin/sh", "/bootstrap/import.sh"]
+    environment:
+      <<: *n8n-env
+      N8N_WEBHOOK_TOKEN: ${N8N_WEBHOOK_TOKEN:-}
+      N8N_INTEGRATION_TOKEN: ${N8N_INTEGRATION_TOKEN:-}
+      POLICYPILOT_API_URL: http://api:8000
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:8080}
+      AGENCY_INBOX: agents@policypilot.test
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+    volumes:
+      - ./docker/n8n/import.sh:/bootstrap/import.sh:ro
+      - ./workflows/n8n:/workflows:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  n8n:
+    image: n8nio/n8n:2.48.6
+    environment:
+      <<: *n8n-env
+      N8N_WEBHOOK_URL: http://localhost:5678/
+      N8N_SECURE_COOKIE: "false"
+    ports:
+      - "127.0.0.1:5678:5678"
+    depends_on:
+      n8n-import:
+        condition: service_completed_successfully
+      mailpit:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:5678/healthz/readiness >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 10
+    restart: unless-stopped
+
+  # Catches every email n8n sends; nothing leaves the machine.
+  mailpit:
+    image: axllent/mailpit:v1.34
+    ports:
+      - "127.0.0.1:8025:8025"
+    restart: unless-stopped
+
+  init-env:
+    image: python:3.12-slim
+    profiles: ["init"]
+    working_dir: /work
+    volumes:
+      - ./:/work
+    command: ["python", "scripts/init_env.py", "/work"]
+
+volumes:
+  pgdata:
