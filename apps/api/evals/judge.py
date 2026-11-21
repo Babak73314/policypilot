@@ -8,19 +8,27 @@ from __future__ import annotations
 
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from evals.checks import TurnRecord
 from evals.scenarios import Scenario
 
 JUDGE_MODEL = "claude-haiku-5-5"
 PASS_SCORE = 3  # a criterion scored below this fails the scenario
+REASON_LIMIT = 300
 
 
 class Score(BaseModel):
     criterion: str
     score: int = Field(ge=1, le=5)
-    reason: str = Field(max_length=300)
+    # No length limit in the schema: a long reason once failed parsing and stopped a whole live
+    # run. It is shortened for the report instead.
+    reason: str
+
+    @field_validator("reason")
+    @classmethod
+    def _short(cls, value: str) -> str:
+        return value if len(value) <= REASON_LIMIT else value[: REASON_LIMIT - 1].rstrip() + "…"
 
 
 class Verdict(BaseModel):
@@ -31,8 +39,11 @@ PROMPT = """You grade replies of an insurance agency's AI assistant (a fictional
 Score each criterion from 1 (clearly fails) to 5 (fully meets it), judging only the final
 assistant reply in the light of the conversation. Give one short reason per criterion.
 
-Conversation:
+Conversation before the final reply:
 {transcript}
+
+Final assistant reply (the one to grade):
+{final}
 
 Policy text the final reply cited (judge factual claims about policies only against this; a claim
 it does not support counts against the reply):
@@ -42,13 +53,24 @@ Criteria:
 {criteria}"""
 
 
+def judge_transcript(turns: list[TurnRecord]) -> tuple[str, str]:
+    """(the conversation up to the last customer message, the final reply).
+
+    The final reply is shown on its own: with one turn, the judge once took the only assistant
+    line for an earlier message and scored a correct reply as missing.
+    """
+    lines = [f"Customer: {t.text}\nAssistant: {t.reply}" for t in turns[:-1]]
+    lines.append(f"Customer: {turns[-1].text}")
+    return "\n".join(lines), turns[-1].reply
+
+
 async def judge_turn(
     settings: Any, scenario: Scenario, turns: list[TurnRecord], evidence: list[str]
 ) -> tuple[list[dict[str, Any]], int]:
     """(scores, estimated cost of the call in micro-dollars)."""
     from langchain_anthropic import ChatAnthropic
 
-    transcript = "\n".join(f"Customer: {t.text}\nAssistant: {t.reply}" for t in turns)
+    transcript, final = judge_transcript(turns)
     criteria = "\n".join(f"- {item}" for item in scenario.judge)
     model = ChatAnthropic(  # same construction as agents/models.py
         model=JUDGE_MODEL,
@@ -60,7 +82,7 @@ async def judge_turn(
     ).with_structured_output(Verdict, method="json_schema", include_raw=True)
     cited = "\n\n".join(evidence) or "(none)"
     output = await model.ainvoke(
-        PROMPT.format(transcript=transcript, evidence=cited, criteria=criteria)
+        PROMPT.format(transcript=transcript, final=final, evidence=cited, criteria=criteria)
     )
     assert isinstance(output, dict)  # include_raw=True: {"raw", "parsed", "parsing_error"}
     verdict = output["parsed"]

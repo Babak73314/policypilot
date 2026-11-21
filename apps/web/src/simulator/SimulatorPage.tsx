@@ -9,6 +9,7 @@ import { readJson, writeJson } from "../lib/storage";
 import { useDocumentTitle } from "../lib/useDocumentTitle";
 import { useFormatters } from "../lib/useFormatters";
 import { useVisibilityPolling } from "../lib/useVisibilityPolling";
+import { WhatsAppText } from "./WhatsAppText";
 
 /** whatsapp.md: the simulator polls once a second while visible and stops after 15 minutes idle. */
 const POLL_MS = 1000;
@@ -233,9 +234,9 @@ function OutgoingBubble({ item, onButton }: { item: SimulatorItem; onButton: (id
           {t("simulator.templateLabel", { name: payload.name })}
         </span>
       )}
-      {payload.type === "text" && payload.text}
-      {payload.type === "interactive" && payload.body}
-      {payload.type === "template" && (payload.body ?? payload.params.join("\n"))}
+      {payload.type === "text" && <WhatsAppText text={payload.text} />}
+      {payload.type === "interactive" && <WhatsAppText text={payload.body} />}
+      {payload.type === "template" && <WhatsAppText text={payload.body ?? payload.params.join("\n")} />}
       <span className="mt-1 block text-right text-[10px] text-slate-500">{fmt.time(item.createdAt)}</span>
       {payload.type === "interactive" && (
         <div className="mt-2 flex flex-col gap-1 border-t border-slate-100 pt-2">

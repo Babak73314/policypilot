@@ -106,12 +106,10 @@ or by default the `policypilot_test` database, which they reset and seed):
   - A summary of the latest live run is committed to `docs/evals/latest.md` by hand, after review.
   - Expected cost: about $1-2 per run.
 
-**Live run status (2026-11-21): run.** The full suite ran once against Claude: 33 of 40 passed,
-for an estimated $1.07. The output guardrail replaced 23 of 55 replies with a template, mostly
-true facts it read as prices. After fixes, the failed scenarios and those with a template
-fallback were rerun: 23 of 24 passed with 3 of 36 turns falling back, and the rerun of the last
-failure and the three fallback scenarios passed 4 of 4 with none. With two
-diagnostic runs, the total was about $3.14. Results, causes and fixes are in
+**Live run status (2026-11-21).** The latest full run against Claude passed 38 of 40 for an
+estimated $1.19, and the output guardrail replaced 1 of 55 replies with a template. Both
+failures were fixed and pass on a rerun. The first full run of the day passed 33 of 40, with 23
+of 55 replies replaced, mostly true facts read as prices; the fixes in between are listed in
 [`docs/evals/latest.md`](../evals/latest.md). The OpenAI fallback was not run live (no key).
 
 - Reports also record each rejected draft's reasons, the guardrail's template-fallback and

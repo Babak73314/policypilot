@@ -10,17 +10,26 @@ anything binding.
 > run against its live API (see [Known limitations](#known-limitations)). All carriers,
 > products, rates, documents and people in this repository are **fictional**.
 
+[![Demo preview: a customer gets quote cards from the rating engine and a cited answer from the policy wording](docs/media/demo-preview.gif)](docs/media/demo.mp4)
+
+**[Watch the 70-second demo (MP4, no audio)](docs/media/demo.mp4):** a quote, a cited policy
+answer, an application with consent, a licensed agent approving it, the decision in the
+customer's chat, a run trace and the WhatsApp simulator. It was recorded from a headless browser
+on a freshly seeded local stack with Claude answering through the live API, with the waits for
+the model cut; all data is fictional.
+
 ## Screenshots
 
-Taken on a freshly seeded local stack with Claude answering through the live API
-(`claude-opus-5-5` and `claude-haiku-5-5`), not the scripted demo model. All data shown is
-fictional.
+Taken with a headless browser at 1280 px wide and 2x scale, on a freshly seeded local stack with
+Claude answering through the live API (`claude-opus-5-5` and `claude-haiku-5-5`), not the
+scripted demo model. All data shown is fictional. `scripts/record_demo.py` regenerates the
+screenshots and the demo video.
 
 | Chat: quotes from the rating engine and a cited answer | Agent desk: review queue |
 |---|---|
 | ![Customer chat with two quote cards and an answer about the grace period that cites two clauses of a policy wording](docs/images/chat-quotes-and-citation.jpg) | ![Review queue with one handoff request and one application review](docs/images/review-queue.jpg) |
-| **Agent desk: run traces of a conversation** | **WhatsApp simulator** |
-| ![Run traces with calls to claude-haiku-5-5 and claude-opus-5-5, a policy search and the output guardrail](docs/images/run-trace.jpg) | ![Simulated WhatsApp chat with the AI disclosure and annual auto quotes](docs/images/whatsapp-simulator.jpg) |
+| **Agent desk: a conversation and its run traces** | **WhatsApp simulator** |
+| ![Conversation transcript next to its run traces, with calls to claude-haiku-5-5 and claude-opus-5-5, a policy search and the output guardrail](docs/images/run-trace.jpg) | ![Simulated WhatsApp chat with the AI disclosure and annual auto quotes, product names in bold](docs/images/whatsapp-simulator.jpg) |
 
 ## Feature status
 
@@ -41,7 +50,7 @@ fictional.
 | MCP server | **Built** | Official Python SDK, Streamable HTTP at `/mcp`, seven tools, a resource and a prompt, and token scopes. |
 | n8n automations | **Built** | An events router (new lead, review needed, handoff) plus lead follow-up and daily digest workflows. They are imported and published unattended at start-up, and the emails land in Mailpit. |
 | Docker Compose stack | **Built** | Database, migrations, seed, API, web (nginx), n8n and Mailpit, with smoke tests for the whole path. |
-| Eval suite and CI | **Built** | 40 scenarios in six groups, offline with the scripted model (checking routes, tools, engine prices, citations, redaction and review state) or live with Claude plus an LLM judge. The first live run passed 33 of 40; after fixes every scenario passes, across one full run and two reruns of the failed ones ([results](docs/evals/latest.md)). CI runs lint, types, tests, offline evals, the compose quick start with smoke tests, and gitleaks and dependency audits. |
+| Eval suite and CI | **Built** | 40 scenarios in six groups, offline with the scripted model (checking routes, tools, engine prices, citations, redaction and review state) or live with Claude plus an LLM judge. The latest full live run passed 38 of 40, with 1 of 55 replies replaced by a template; both failures were fixed and pass on a rerun ([results](docs/evals/latest.md)). CI runs lint, types, tests, offline evals, the compose quick start with smoke tests, and gitleaks and dependency audits. |
 
 ## Known limitations
 
@@ -81,12 +90,13 @@ check are described below.
   An amount that is not a fact of the turn is always rejected. A fact is rejected when a period
   follows it ("80 a month"), or when a price word sits right before it ("costs 80", "the premium
   is about 80") and no unit or attribute noun is attached ("pay a $6,000 deductible").
-- **Live evaluation is partial.** The eval suite ran once in full against Claude (33 of 40
-  passed, $1.07), and the failing scenarios were rerun after fixes ([results](docs/evals/latest.md)).
-  There has been no second full run, so the share of replies the guardrail rejects on the whole
-  suite after the fixes is not measured; on the rerun it was 3 of 36 turns, and such a turn shows
-  the customer a fixed template reply instead of the model's answer. The OpenAI fallback has not
-  been run against its live API.
+- **Some correct replies still fall back to a template.** On the latest full live run (38 of 40
+  passed), the guardrail replaced 1 of 55 replies with a fixed template reply, a correct answer
+  whose wording it misread ([results](docs/evals/latest.md)). That case is fixed, but other
+  wordings can still trip the number check; the customer then gets a safe template instead of
+  the model's answer.
+- **The OpenAI fallback has not been run against its live API** (no key was set); it is covered
+  by unit tests.
 
 ## Architecture
 

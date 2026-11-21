@@ -345,6 +345,12 @@ def apply_judge(result: ScenarioResult, scores: list[dict[str, Any]], pass_score
         ]
 
 
+def record_judge_error(result: ScenarioResult, exc: BaseException) -> None:
+    """A judge call that fails counts against the scenario; the run goes on."""
+    result.passed = False
+    result.failures.append(f"judge error: {type(exc).__name__}: {str(exc)[:200]}")
+
+
 async def cited_clauses(app: Any, turn: TurnRecord) -> list[str]:
     """The text of the chunks the reply cited, for the judge."""
     from policypilot.db.models import DocumentChunk, PolicyDocument
@@ -403,9 +409,13 @@ async def run_all(
                     from evals.judge import PASS_SCORE, judge_turn
 
                     evidence = await cited_clauses(app, result.turns[-1])
-                    scores, cost = await judge_turn(settings, scenario, result.turns, evidence)
-                    result.judge_cost_micros = cost
-                    apply_judge(result, scores, PASS_SCORE)
+                    try:
+                        scores, cost = await judge_turn(settings, scenario, result.turns, evidence)
+                    except Exception as exc:  # the judge must not stop the run
+                        record_judge_error(result, exc)
+                    else:
+                        result.judge_cost_micros = cost
+                        apply_judge(result, scores, PASS_SCORE)
                 results.append(result)
                 mark = "PASS" if result.passed else "FAIL"
                 print(f"  {mark}  {scenario.group:<15} {scenario.id}", flush=True)

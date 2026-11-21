@@ -64,12 +64,13 @@ check are described below.
   An amount that is not a fact of the turn is always rejected. A fact is rejected when a period
   follows it ("80 a month"), or when a price word sits right before it ("costs 80", "the premium
   is about 80") and no unit or attribute noun is attached ("pay a $6,000 deductible").
-- **Live evaluation is partial.** The eval suite ran once in full against Claude (33 of 40
-  passed, $1.07), and the failing scenarios were rerun after fixes ([results](evals/latest.md)).
-  There has been no second full run, so the share of replies the guardrail rejects on the whole
-  suite after the fixes is not measured; on the rerun it was 3 of 36 turns, and such a turn shows
-  the customer a fixed template reply instead of the model's answer. The OpenAI fallback has not
-  been run against its live API.
+- **Some correct replies still fall back to a template.** On the latest full live run (38 of 40
+  passed), the guardrail replaced 1 of 55 replies with a fixed template reply, a correct answer
+  whose wording it misread ([results](evals/latest.md)). That case is fixed, but other wordings
+  can still trip the number check; the customer then gets a safe template instead of the
+  model's answer.
+- **The OpenAI fallback has not been run against its live API** (no key was set); it is covered
+  by unit tests.
 
 ## Phase 2: production-shaped (proposal)
 
@@ -89,8 +90,7 @@ check are described below.
 - SQS between the API and its async work, if traffic warrants it.
 - **Recovery and concurrency hardening** for the known limitations above (review 02,
   findings 4, 7, 9 and 15), with failure-injection tests at each commit/checkpoint boundary.
-- **A second full live eval run** after the Phase 1 fixes, a live check of the OpenAI fallback,
-  and live evals in a scheduled CI job with a cost cap.
+- **A live check of the OpenAI fallback**, and live evals in a scheduled CI job with a cost cap.
 
 ## Phase 3: with a real client (proposal)
 

@@ -145,3 +145,11 @@ def test_a_question_about_a_guarantee_is_not_a_guarantee() -> None:
 
     assert banned_claims("On whether the price is guaranteed: no, quotes aren't guaranteed.") == []
     assert banned_claims("Your price is guaranteed.") == ["guaranteed"]
+
+
+def test_the_history_price_marker_never_reaches_a_customer() -> None:
+    from policypilot.agents.guardrails import QUOTED_PRICE, TurnFacts, validate
+
+    facts = TurnFacts(quote_ids=set(), chunk_ids=set(), chunk_products={}, allowed_amounts=set())
+    result = validate(f"It is {QUOTED_PRICE}.", facts, "web")
+    assert result.problems == ["history_price_marker"]

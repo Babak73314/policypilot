@@ -39,6 +39,8 @@ BANNED = [
 NEGATION = re.compile(
     r"\b(not|no|never|isn't|aren't|cannot|can't|won't|whether)\b[\w ,']{0,25}$", re.I
 )
+# Marks a rendered price in the model's own history (nodes.history_text); never in a reply.
+QUOTED_PRICE = "[price from the quote tool]"
 MAX_LENGTH = {"web": 3000, "whatsapp": 4000}
 
 # Number accounting (review 02, finding 1). Prices reach customers only through
@@ -76,9 +78,11 @@ UNIT_AFTER = re.compile(
     re.I,
 )
 LABEL_BEFORE = re.compile(
-    r"\b(?:age|aged|ages|clause|clauses|section|sections|page|pages|"
+    r"(?:\b(?:age|aged|ages|clause|clauses|section|sections|page|pages|"
     r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*(?:\s\d{1,2},)?)"
-    r"(?:\s+(?:between|from|of|up to|over|under))?\s*$",
+    r"(?:\s+(?:between|from|of|up to|over|under))?"
+    # product versions in brackets after a plural noun: "Kestrel term policies (10, 20 and 30)"
+    r"|\b(?:policies|products|plans|versions|options|terms)\s*\()\s*$",
     re.I,
 )
 LIST_LINK = re.compile(r"^\s*(?:,|-|\bto\b|\band\b|\bor\b|\bthrough\b)\s*(?:\band\b|\bor\b)?\s*$")
@@ -237,6 +241,8 @@ def validate(text: str, facts: TurnFacts, channel: str) -> Validation:
             result.problems.append(f"wrong_product_citation:{chunk_id}")
     if facts.policy_question and not any(c in facts.chunk_ids for c in cited):
         result.problems.append("policy_answer_without_citation")
+    if QUOTED_PRICE in text:  # the history marker (nodes.history_text), never a reply
+        result.problems.append("history_price_marker")
     for claim in banned_claims(text):
         result.problems.append(f"banned_claim:{claim}")
     if len(text) > MAX_LENGTH.get(channel, 3000):

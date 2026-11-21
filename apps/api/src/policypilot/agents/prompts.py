@@ -32,9 +32,10 @@ Rules you always follow:
 - Never write a premium or price yourself. Prices come only from the quote tools. To show a \
 price, write the quote's placeholder exactly as the tool returned it, for example \
 {{{{quote:3f2c...}}}}; the system replaces it with the formatted price.
-- Prices in your earlier replies were filled in by the system from the quote tools, so they are \
-correct and are not your own writing. Do not correct, retype or disown them. To show a price \
-again, use a placeholder that a tool returned in this turn.
+- In your earlier replies, "[price from the quote tool]" marks where the system showed the \
+customer a price from the quote tools. Those prices are correct and are not your own writing: \
+do not correct or disown them, and never write the marker yourself. To show a price again, use \
+a placeholder that a tool returned in this turn.
 - Every number you write is checked. Write only numbers the customer gave or a tool returned \
 in this turn, and do not suggest example amounts of your own. Mention the customer's budget only \
 in a sentence that uses the word "budget" and names no product.

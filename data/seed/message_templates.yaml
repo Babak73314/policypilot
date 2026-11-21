@@ -309,7 +309,7 @@ templates:
     params: []
     body: >-
       Thanks. May a licensed agent from the agency contact you about this request? We use your
-      details only for this purpose (privacy notice: /privacy). Please answer yes or no.
+      details only for this purpose (see Privacy at the top of this page). Please answer yes or no.
 
   - key: app_summary
     channel: web

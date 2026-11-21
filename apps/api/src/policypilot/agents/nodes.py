@@ -25,7 +25,13 @@ from sqlalchemy import select
 
 from policypilot.agents import numbers, prompts
 from policypilot.agents.context import AgentContext
-from policypilot.agents.guardrails import TurnFacts, render, render_quote, validate
+from policypilot.agents.guardrails import (
+    QUOTED_PRICE,
+    TurnFacts,
+    render,
+    render_quote,
+    validate,
+)
 from policypilot.agents.models import MODEL_FAILURES
 from policypilot.agents.schemas import ProfileDelta, RouteDecision
 from policypilot.agents.state import ConversationState
@@ -494,9 +500,21 @@ async def guard_output(state: ConversationState, runtime: Runtime[AgentContext])
     return {
         "reply": reply,
         "citations": citations,
-        "messages": [AIMessage(content=reply)],
+        "messages": [AIMessage(content=history_text(reply, quotes, ctx.locale))],
         "flags": {**(state.get("flags") or {}), "guardrail_actions": actions},
     }
+
+
+def history_text(reply: str, quotes: dict[str, Quote], locale: str) -> str:
+    """The reply as the model will see it in later turns: rendered prices become a marker.
+
+    The customer sees the rendered prices. Shown them in its own earlier reply, Claude took the
+    smoker prices (which no tool result lists) for prices it had typed and told the customer to
+    ignore them (found in the live demo recording). The marker keeps that from happening.
+    """
+    for quote in quotes.values():
+        reply = reply.replace(render_quote(quote, locale), QUOTED_PRICE)
+    return reply
 
 
 def _fallback_text(

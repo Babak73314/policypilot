@@ -277,6 +277,8 @@ def health_facts() -> TurnFacts:
         # A deductible in plain words (the second live run, WhatsApp, auto).
         "It covers your own car in a crash, but you pay the first $3,000 of a claim.",
         "On a crash claim you pay the first $6,000 instead.",
+        # Product versions in brackets (the second full live run).
+        "All three Kestrel term policies (10, 20 and 30) don't pay out for suicide within 2 years.",
         "The main difference is the deductible, which is what you'd pay towards a claim: $3,000 "
         "with Tollgate and $6,000 with Evergreen.",
     ],
@@ -303,6 +305,7 @@ def test_marked_facts_pass_in_price_sentences(reply: str) -> None:
         "You pay $3,000 a month per claim for Kestrel Term Life.",
         "Your monthly premium with this deductible is: Kestrel Term Life $3,000.",
         "With its deductible, you pay $3,000 for Kestrel Term Life.",
+        "Kestrel Term Life plans (80) cost less.",
     ],
 )
 def test_marks_do_not_launder_a_price(reply: str) -> None:

@@ -4,3 +4,6 @@
 *.ico binary
 *.ps1 text eol=crlf
 *.jpg binary
+*.mp4 binary
+*.gif binary
+*.webp binary

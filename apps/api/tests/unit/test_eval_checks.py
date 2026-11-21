@@ -78,7 +78,9 @@ def test_a_low_judge_score_fails_the_scenario() -> None:
 def test_the_judge_sees_the_cited_policy_text() -> None:
     from evals.judge import PROMPT
 
-    prompt = PROMPT.format(transcript="t", evidence="4.1 Suicide. We will not pay", criteria="c")
+    prompt = PROMPT.format(
+        transcript="t", final="f", evidence="4.1 Suicide. We will not pay", criteria="c"
+    )
     assert "4.1 Suicide. We will not pay" in prompt
 
 
@@ -135,3 +137,34 @@ def test_the_report_counts_guardrail_rejections() -> None:
         "template_fallback: unverified_premium:8000",
         "repair: banned_claim:x",
     ]
+
+
+def test_a_long_judge_reason_is_shortened_not_rejected() -> None:
+    from evals.judge import REASON_LIMIT, Verdict
+
+    verdict = Verdict.model_validate(
+        {"scores": [{"criterion": "Supported", "score": 3, "reason": "x" * 900}]}
+    )
+    reason = verdict.scores[0].reason
+    assert len(reason) == REASON_LIMIT
+    assert reason.endswith("…")
+
+
+def test_a_judge_error_fails_the_scenario_without_stopping_the_run() -> None:
+    from evals.runner import record_judge_error
+
+    result = _result(1_000)
+    record_judge_error(result, ValueError("Failed to parse Verdict"))
+    assert not result.passed
+    assert result.failures == ["judge error: ValueError: Failed to parse Verdict"]
+
+
+def test_the_judge_sees_the_final_reply_on_its_own() -> None:
+    from evals.judge import PROMPT, judge_transcript
+
+    turns = [TurnRecord(text="I'm 34", reply="How much cover would you like?")]
+    transcript, final = judge_transcript(turns)
+    assert transcript == "Customer: I'm 34"
+    assert final == "How much cover would you like?"
+    prompt = PROMPT.format(transcript=transcript, final=final, evidence="(none)", criteria="- c")
+    assert "the one to grade):\nHow much cover would you like?" in prompt

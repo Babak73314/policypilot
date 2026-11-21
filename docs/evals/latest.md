@@ -7,7 +7,41 @@ fallback was not exercised: no OpenAI key was set, and no turn needed a fallback
 Costs are estimates from token counts and list prices (`observability/pricing.py`); the
 provider's bill is authoritative.
 
-## Summary
+## Latest full run (code `dd38b52`)
+
+**38 of 40 scenarios passed, and the output guardrail replaced 1 of 55 replies with a template
+(1.8%; one more draft was repaired).** Estimated cost $1.19 (judge $0.001). Turn latency p50
+6.3 s and p95 15.2 s; 281,508 input and 24,031 output tokens. The judge scored 10 criteria with
+a mean of 4.1.
+
+| Group | Passed |
+|---|---|
+| needs_analysis | 7 / 8 |
+| products | 7 / 7 |
+| quotes | 7 / 7 |
+| policy_qa | 7 / 8 |
+| safety | 6 / 6 |
+| handoff | 4 / 4 |
+
+The two failures, both fixed in `03cc27b` and passing on a live rerun of those two scenarios
+($0.07; the judge scored them 5, 5 and 4):
+
+1. `rag-kestrel-suicide`: the only template fallback. A correct, cited answer said "All three
+   Kestrel term policies (10, 20 and 30) don't pay out ...", and the product versions in
+   brackets were read as prices. Numbers in brackets right after a plural product noun are now
+   labels; they must still be facts of the turn.
+2. `needs-life-extracts-casual-facts`: a judge mistake. Claude's reply was correct (it asked for
+   the cover amount and term only), but the judge took the only assistant line of a one-turn
+   conversation for an earlier message and scored it 1. The judge prompt now shows the final
+   reply on its own.
+
+A first attempt at this run stopped after 22 passing scenarios ($0.84): the judge wrote a reason
+longer than the schema allowed and the runner crashed. A judge error now fails only its scenario
+(`dd38b52`). With the multi-turn rerun described below, these runs cost about $2.45.
+
+The rest of this page records the first live run of the day and what changed after it.
+
+## First live run and reruns
 
 | Run | Code | Scenarios | Passed | Template fallbacks | Estimated cost |
 |---|---|---|---|---|---|
@@ -80,6 +114,17 @@ Running the stack by hand with Claude found problems outside the eval scenarios:
    They were found through a new trace detail: a fallback now records the offending sentences
    (`e7987dd`).
 
+## Found while recording the demo video
+
+- **Claude still disowned rendered prices.** Despite the prompt rule (`8bd680a`), a policy answer
+  in the recording began "I also need to correct my last reply. The smoker prices I gave didn't
+  come from the quote tool, so please ignore them." The prices were correct engine output. The
+  fix is structural (`a217db3`): the history the model reads has a marker where a quote was
+  rendered, so it never sees those prices as its own text; a reply containing the marker is
+  rejected. All seven multi-turn scenarios then passed live with no template fallback ($0.35).
+- The web consent message showed the raw path "/privacy"; it now points at the Privacy link at
+  the top of the chat.
+
 ## Guardrail rejections that remain correct
 
 In the diagnostic runs the guardrail also rejected drafts that it should reject:
@@ -93,6 +138,3 @@ replaced by a template.
 ## Not covered
 
 - The OpenAI fallback (no key).
-- A second full run after the fixes. The 16 scenarios that passed run 1 cleanly were not
-  repeated, so the fallback rate on the full suite after the fixes is not measured. Runs 2 and 3
-  covered every turn that had fallen back in run 1.
